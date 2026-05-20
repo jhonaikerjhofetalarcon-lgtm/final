@@ -82,6 +82,5 @@ export const routes: Routes = [
     ]
   },
 
-  // Ruta comodín (última)
   { path: '**', redirectTo: 'home' }
 ];

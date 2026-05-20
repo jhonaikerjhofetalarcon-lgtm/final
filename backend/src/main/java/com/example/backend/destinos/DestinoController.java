@@ -1,23 +1,38 @@
 package com.example.backend.destinos;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/destinos")
 public class DestinoController {
 
-  private final DestinoRepository repo;
+  private final DestinoService service;
 
-  public DestinoController(DestinoRepository repo) {
-    this.repo = repo;
+  public DestinoController(DestinoService service) {
+    this.service = service;
   }
 
   @GetMapping
   public List<DestinoResponse> list() {
-    return repo.findAllOrderByTitle().stream().map(DestinoResponse::from).toList();
+    return service.list();
+  }
+
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public DestinoResponse create(@RequestBody DestinoCreateRequest req) {
+    return service.create(req);
+  }
+
+  @PutMapping("/{id}")
+  public DestinoResponse update(@PathVariable String id, @RequestBody DestinoUpdateRequest req) {
+    return service.update(id, req);
+  }
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void delete(@PathVariable String id) {
+    service.delete(id);
   }
 }
-

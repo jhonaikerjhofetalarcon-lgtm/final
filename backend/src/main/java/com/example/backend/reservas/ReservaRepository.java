@@ -52,7 +52,8 @@ public class ReservaRepository {
     data.put("destino",     e.getDestino());
     data.put("fechaIda",    e.getFechaIda() != null ? e.getFechaIda().toString() : "");
     data.put("fechaVuelta", e.getFechaVuelta() != null ? e.getFechaVuelta().toString() : "");
-    data.put("pasajeros",   e.getPasajeros());
+    data.put("dni", e.getDni());
+    data.put("idAsiento", e.getIdAsiento() != null ? e.getIdAsiento() : "");
     data.put("notas",       e.getNotas() != null ? e.getNotas() : "");
 
     data.put("createdAt",   e.getCreatedAt() != null ? e.getCreatedAt().toString() : Instant.now().toString());
@@ -85,8 +86,8 @@ public class ReservaRepository {
       try { e.setFechaVuelta(LocalDate.parse(fechaVuelta)); } catch (Exception ignored) {}
     }
 
-    e.setPasajeros(safeInt(d, "pasajeros"));
-    if (e.getPasajeros() < 1) e.setPasajeros(1);
+    e.setDni(safeInt(d, "dni"));
+    e.setIdAsiento(safeStr(d, "idAsiento"));
 
     e.setCreatedAt(safeInstant(d, "createdAt"));
     return e;

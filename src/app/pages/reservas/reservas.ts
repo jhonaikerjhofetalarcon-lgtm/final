@@ -1,157 +1,176 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import { G7ApiService, ReservaCreatePayload, DestinoDto } from '../../core/g7-api.service';
+import { FormsModule } from '@angular/forms';
+import { G7ApiService, AsientoDto, ReservaCreatePayload, DestinoDto, AutoDto } from '../../core/g7-api.service';
 
-interface DestinoOption {
-  valor: string;
+interface Pasajero {
   nombre: string;
+  apellido: string;
+  dni: number;
+  email: string;
+  telefono: string;
 }
 
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './reservas.html',
   styleUrl: './reservas.css',
 })
 export class Reservas implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly api = inject(G7ApiService);
+  private api = inject(G7ApiService);
 
-  formulario: FormGroup;
+  destinos: DestinoDto[] = [];
+  destinoSeleccionado: DestinoDto | null = null;
+  autoSeleccionado: AutoDto | null = null;
+
+  asientos: AsientoDto[] = [];
+  asientosFilas: AsientoDto[][] = [];
+  copiloto: AsientoDto | null = null;
+
+  asientosSeleccionados: AsientoDto[] = [];
+  pasajeros: Pasajero[] = [];
+
+  mostrarModal = false;
   enviado = false;
   cargando = false;
   errorApi: string | null = null;
+  reservasConfirmadas = 0;
 
-  destinos: DestinoOption[] = [];
-
-  // 🚍 ASIENTOS
-  asientos: any[][] = [];
-
-  constructor() {
-    this.formulario = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(3)]],
-      apellido: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      telefono: ['', [Validators.required, Validators.pattern(/^\d{9,15}$/)]],
-      destino: ['', Validators.required],
-      fechaIda: ['', Validators.required],
-      fechaVuelta: ['', Validators.required],
-      pasajeros: [1, [Validators.required, Validators.min(1), Validators.max(20)]],
-      clase: ['economica', Validators.required],
-      notas: [''],
-    });
+  ngOnInit() {
+    this.cargarDestinos();
   }
 
-  ngOnInit(): void {
+  cargarDestinos() {
     this.api.getDestinos().subscribe({
-      next: (list: DestinoDto[]) => {
-        this.destinos = list.map((d) => ({
-          valor: (d.title ?? d.name ?? '').toLowerCase().trim(),
-          nombre: d.title || d.name,
-        }));
-      },
-      error: () => {
-        this.destinos = [
-          { valor: 'machu picchu', nombre: 'Machu Picchu' },
-          { valor: 'cusco', nombre: 'Cusco' },
-          { valor: 'titicaca', nombre: 'Lago Titicaca' },
-        ];
-      },
+      next: (data) => this.destinos = data,
+      error: () => this.errorApi = 'Error al cargar destinos'
     });
-
-    this.generarAsientos();
   }
 
-  // 🚍 ASIENTOS
-  generarAsientos() {
-    let contador = 1;
-
-    this.asientos = Array.from({ length: 5 }, () =>
-      Array.from({ length: 4 }, () => {
-        const ocupado = Math.random() < 0.3;
-
-        return {
-          numero: contador++,
-          ocupado,
-          seleccionado: false,
-        };
-      })
-    );
-  }
-
-  seleccionarAsiento(i: number, j: number) {
-    const asiento = this.asientos[i][j];
-
-    if (asiento.ocupado) return;
-
-    const seleccionados = this.asientos.flat().filter(a => a.seleccionado);
-
-    if (!asiento.seleccionado && seleccionados.length >= this.formulario.value.pasajeros) {
-      return;
-    }
-
-    asiento.seleccionado = !asiento.seleccionado;
-  }
-
-  // ✔ FIX TRACKBY
-  trackByValor(index: number, item: any): string {
-    return item.valor;
-  }
-
-  campo(nombre: string) {
-    return this.formulario.get(nombre);
-  }
-
-  invalido(nombre: string): boolean {
-    const c = this.campo(nombre);
-    return !!(c && c.invalid && (c.dirty || c.touched));
-  }
-
-  onSubmit(): void {
-    if (this.formulario.invalid) {
-      this.formulario.markAllAsTouched();
+  async onDestinoChange() {
+    if (!this.destinoSeleccionado) {
+      this.resetearSeleccion();
       return;
     }
 
     this.cargando = true;
+    this.errorApi = null;
 
-    const v = this.formulario.value;
+    try {
+      // Cargar vehículo asignado al destino
+      const autos = await this.api.getAutos().toPromise() || [];
+      this.autoSeleccionado = autos.find(a => a.id === this.destinoSeleccionado!.idAuto) || null;
 
-    const payload: ReservaCreatePayload = {
-      nombre: v.nombre,
-      apellido: v.apellido,
-      email: v.email,
-      telefono: v.telefono,
-      destino: v.destino,
-      fechaIda: v.fechaIda,
-      fechaVuelta: v.fechaVuelta,
-      pasajeros: v.pasajeros,
-      clase: v.clase,
-      notas: v.notas,
-    };
+      // Cargar solo asientos de ese vehículo
+      const todosAsientos = await this.api.getAsientos().toPromise() || [];
+      this.asientos = todosAsientos.filter(a => a.idAuto === this.destinoSeleccionado!.idAuto);
 
-    this.api.createReserva(payload).subscribe({
-      next: () => {
-        this.cargando = false;
-        this.enviado = true;
-      },
-      error: () => {
-        this.cargando = false;
-        this.errorApi = 'Error al enviar reserva';
-      },
-    });
+      // Separar copiloto
+      this.copiloto = this.asientos.find(a => 
+        a.numeroAsiento?.toUpperCase().includes('C') || 
+        a.numeroAsiento === '1' || 
+        a.numeroAsiento === '01'
+      ) || null;
+
+      const restantes = this.asientos.filter(a => a.id !== this.copiloto?.id);
+      this.asientosFilas = [];
+      for (let i = 0; i < restantes.length; i += 4) {
+        this.asientosFilas.push(restantes.slice(i, i + 4));
+      }
+
+    } catch (e) {
+      this.errorApi = 'Error al cargar el vehículo y asientos';
+      console.error(e);
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  nuevaReserva(): void {
+  private resetearSeleccion() {
+    this.autoSeleccionado = null;
+    this.asientos = [];
+    this.asientosFilas = [];
+    this.copiloto = null;
+    this.asientosSeleccionados = [];
+  }
+
+  toggleAsiento(asiento: AsientoDto) {
+    if (asiento.estado !== 'libre') return;
+
+    const index = this.asientosSeleccionados.findIndex(a => a.id === asiento.id);
+    if (index >= 0) {
+      this.asientosSeleccionados.splice(index, 1);
+      asiento.estado = 'libre';
+    } else {
+      this.asientosSeleccionados.push(asiento);
+      asiento.estado = 'reservado';
+    }
+  }
+
+  abrirFormularioPasajeros() {
+    if (this.asientosSeleccionados.length === 0 || !this.destinoSeleccionado) return;
+
+    this.pasajeros = this.asientosSeleccionados.map(() => ({
+      nombre: '', 
+      apellido: '', 
+      dni: 0, 
+      email: '', 
+      telefono: ''
+    }));
+
+    this.mostrarModal = true;
+  }
+
+  cancelarModal() {
+    this.mostrarModal = false;
+    this.asientosSeleccionados.forEach(a => a.estado = 'libre');
+    this.asientosSeleccionados = [];
+  }
+
+  async confirmarReservas() {
+    if (!this.destinoSeleccionado || this.pasajeros.length === 0) return;
+
+    this.cargando = true;
+
+    try {
+      for (let i = 0; i < this.asientosSeleccionados.length; i++) {
+        const p = this.pasajeros[i];
+        const asiento = this.asientosSeleccionados[i];
+
+        const payload: ReservaCreatePayload = {
+          nombre: p.nombre,
+          apellido: p.apellido,
+          email: p.email,
+          telefono: p.telefono,
+          destino: this.destinoSeleccionado.name || this.destinoSeleccionado.title,
+          fechaIda: '2026-06-15',
+          fechaVuelta: '2026-06-20',
+          dni: p.dni,
+          clase: 'economica',
+          notas: `Asiento ${asiento.numeroAsiento} - ${this.destinoSeleccionado.title}`,
+        };
+
+        await this.api.createReserva(payload).toPromise();
+      }
+
+      this.reservasConfirmadas = this.asientosSeleccionados.length;
+      this.enviado = true;
+    } catch (error) {
+      this.errorApi = 'Error al confirmar la reserva';
+      console.error(error);
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  nuevaReserva() {
     this.enviado = false;
-    this.formulario.reset({ pasajeros: 1, clase: 'economica' });
-    this.generarAsientos();
+    this.asientosSeleccionados = [];
+    this.pasajeros = [];
+    this.mostrarModal = false;
+    this.destinoSeleccionado = null;
+    this.autoSeleccionado = null;
   }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule,DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { G7ApiService, ReservaDto } from '../../core/g7-api.service';
 
@@ -14,36 +14,39 @@ export class Reservas implements OnInit {
   private readonly api = inject(G7ApiService);
 
   busqueda = '';
-  error: string | null = null;
-  successMsg: string | null = null;
-
   reservas: ReservaDto[] = [];
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.cargar();
+  }
 
   cargar(): void {
-    this.api.getReservas().subscribe({ next: d => this.reservas = d, error: () => {} });
+    this.api.getReservas().subscribe({
+      next: (data) => this.reservas = data,
+      error: () => console.error('Error cargando reservas')
+    });
   }
 
   eliminar(r: ReservaDto): void {
     if (!confirm(`¿Eliminar reserva de ${r.nombre} ${r.apellido}?`)) return;
+
     this.api.deleteReserva(r.id).subscribe({
-      next: () => { this.cargar(); this.flash('🗑 Reserva eliminada'); },
-      error: () => { this.error = 'No se pudo eliminar.'; },
+      next: () => {
+        this.cargar();
+      },
+      error: () => alert('No se pudo eliminar la reserva')
     });
   }
 
   filtrados(): ReservaDto[] {
-    const q = this.busqueda.toLowerCase();
-    return q ? this.reservas.filter(r =>
-      r.nombre.toLowerCase().includes(q) ||
-      r.apellido.toLowerCase().includes(q) ||
-      r.destino.toLowerCase().includes(q)
-    ) : this.reservas;
-  }
+    const q = this.busqueda.toLowerCase().trim();
+    if (!q) return this.reservas;
 
-  private flash(msg: string): void {
-    this.successMsg = msg;
-    setTimeout(() => (this.successMsg = null), 3000);
+    return this.reservas.filter(r =>
+      `${r.nombre} ${r.apellido}`.toLowerCase().includes(q) ||
+      r.email?.toLowerCase().includes(q) ||
+      r.dni?.toString().includes(q) ||
+      r.destino?.toLowerCase().includes(q)
+    );
   }
 }

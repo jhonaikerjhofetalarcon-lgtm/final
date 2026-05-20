@@ -1,109 +1,127 @@
-        <section class="section-content">
+<section class="section-content">
 
-            <div class="toolbar">
-                <div class="search-wrap">
-                    <span class="si">🔍</span>
-                    <input class="search-input" type="text" [(ngModel)]="busqueda"
-                        placeholder="Buscar por placa, marca…">
-                </div>
-                <button class="btn-primary" (click)="abrir()">+ Nuevo Vehículo</button>
+    <div class="toolbar">
+        <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input class="search-input" type="text" [(ngModel)]="busqueda" placeholder="Buscar por placa, marca...">
+        </div>
+        <button class="btn-primary" (click)="abrirNuevo()">+ Nuevo Vehículo</button>
+    </div>
+
+    <!-- FORMULARIO -->
+    @if (formVisible) {
+    <div class="form-card">
+        <h3>{{ editingId ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h3>
+        <div class="form-grid">
+            <div class="fg">
+                <label>Placa <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="fAuto.placa" placeholder="ABC-123" maxlength="10">
             </div>
-
-            @if (formVisible) {
-            <div class="form-card">
-                <h3>{{ editingId ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h3>
-                <div class="form-grid">
-                    <div class="fg"><label>Placa <span class="req">*</span></label>
-                        <input type="text" [(ngModel)]="fAuto.placa" placeholder="ABC-123">
-                    </div>
-                    <div class="fg"><label>Marca <span class="req">*</span></label>
-                        <input type="text" [(ngModel)]="fAuto.marca" placeholder="Toyota">
-                    </div>
-                    <div class="fg"><label>Modelo</label>
-                        <input type="text" [(ngModel)]="fAuto.modelo" placeholder="Hiace">
-                    </div>
-                    <div class="fg"><label>Color</label>
-                        <input type="text" [(ngModel)]="fAuto.color" placeholder="Blanco">
-                    </div>
-                    <div class="fg"><label>Año de fabricación</label>
-                        <input type="number" [(ngModel)]="fAuto.anioFabrica" min="1990" max="2030">
-                    </div>
-                    <div class="fg"><label>Cantidad de asientos</label>
-                        <input type="number" [(ngModel)]="fAuto.cantidadAsiento" min="1">
-                    </div>
-                    <div class="fg"><label>Tipo</label>
-                        <select [(ngModel)]="fAuto.tipo">
-                            <option value="minivan">Minivan</option>
-                            <option value="bus">Bus</option>
-                            <option value="sedan">Sedán</option>
-                            <option value="suv">SUV</option>
-                        </select>
-                    </div>
-                    <div class="fg"><label>Conductor asignado</label>
-                        <input type="text" [(ngModel)]="fAuto.conductor" placeholder="Nombre del conductor">
-                    </div>
-                    <div class="fg"><label>Estado</label>
-                        <select [(ngModel)]="fAuto.estado">
-                            <option value="activo">Activo</option>
-                            <option value="mantenimiento">En mantenimiento</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-cancel" (click)="cerrar()">Cancelar</button>
-                    <button class="btn-save" (click)="guardar()">{{ editingId ? 'Actualizar' : 'Registrar Vehículo'
-                        }}</button>
-                </div>
+            <div class="fg">
+                <label>Marca <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="fAuto.marca" placeholder="Toyota">
             </div>
-            }
-
-            <div class="table-card">
-                <div class="table-wrap">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Placa</th>
-                                <th>Marca / Modelo</th>
-                                <th>Color</th>
-                                <th>Año</th>
-                                <th>Asientos</th>
-                                <th>Tipo</th>
-                                <th>Conductor</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (a of filtrados(); track a.id; let i = $index) {
-                            <tr>
-                                <td class="td-n">{{ i+1 }}</td>
-                                <td><strong>{{ a.placa }}</strong></td>
-                                <td>{{ a.marca }} {{ a.modelo }}</td>
-                                <td>{{ a.color }}</td>
-                                <td>{{ a.anioFabrica }}</td>
-                                <td class="td-c">{{ a.cantidadAsiento }}</td>
-                                <td><span class="badge b-tipo">{{ a.tipo }}</span></td>
-                                <td>{{ a.conductor || '—' }}</td>
-                                <td><span class="badge" [class.b-ok]="a.estado==='activo'"
-                                        [class.b-pend]="a.estado==='mantenimiento'"
-                                        [class.b-err]="a.estado==='inactivo'">{{ a.estado }}</span></td>
-                                <td class="td-act">
-                                    <button class="btn-ico edit" (click)="abrirEditar(a)">✏️</button>
-                                    <button class="btn-ico del" (click)="eliminar(a)">🗑️</button>
-                                </td>
-                            </tr>
-                            }
-                            @if (filtrados().length === 0) {
-                            <tr>
-                                <td colspan="10" class="td-empty">No hay vehículos registrados</td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+            <div class="fg">
+                <label>Modelo</label>
+                <input type="text" [(ngModel)]="fAuto.modelo" placeholder="Hiace">
             </div>
+            <div class="fg">
+                <label>Color</label>
+                <input type="text" [(ngModel)]="fAuto.color" placeholder="Blanco">
+            </div>
+            <div class="fg">
+                <label>Año Fabricación</label>
+                <input type="number" [(ngModel)]="fAuto.anioFabrica" min="1990" max="2035">
+            </div>
+            <div class="fg">
+                <label>Cantidad de Asientos</label>
+                <input type="number" [(ngModel)]="fAuto.cantidadAsiento" min="4" max="50">
+            </div>
+            <div class="fg">
+                <label>Tipo</label>
+                <select [(ngModel)]="fAuto.tipo">
+                    <option value="minivan">Minivan</option>
+                    <option value="bus">Bus</option>
+                    <option value="sedan">Sedán</option>
+                    <option value="suv">SUV</option>
+                    <option value="camioneta">Camioneta</option>
+                    <option value="combi">Combi</option>
+                </select>
+            </div>
+<div class="fg">
+    <label>Conductor</label>
+    <select [(ngModel)]="fAuto.conductor">
+        <option value="">Sin conductor asignado</option>
+        @for (c of conductores; track c.id) {
+            <option [value]="c.nombre">
+                {{ c.nombre }} ({{ c.telefono || 'sin teléfono' }})
+            </option>
+        }
+    </select>
+</div>
+            <div class="fg">
+                <label>Estado</label>
+                <select [(ngModel)]="fAuto.estado">
+                    <option value="activo">Activo</option>
+                    <option value="mantenimiento">En Mantenimiento</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+            </div>
+        </div>
 
-        </section>
-        
+        <div class="form-actions">
+            <button class="btn-cancel" (click)="cerrarForm()">Cancelar</button>
+            <button class="btn-save" (click)="guardar()">{{ editingId ? 'Actualizar' : 'Guardar Vehículo' }}</button>
+        </div>
+    </div>
+    }
+
+    <!-- TABLA -->
+    <div class="table-card">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Placa</th>
+                        <th>Marca / Modelo</th>
+                        <th>Año</th>
+                        <th>Asientos</th>
+                        <th>Tipo</th>
+                        <th>Conductor</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (a of filtrados(); track a.id; let i = $index) {
+                    <tr>
+                        <td class="td-n">{{ i+1 }}</td>
+                        <td><strong>{{ a.placa }}</strong></td>
+                        <td>{{ a.marca }} {{ a.modelo }}</td>
+                        <td>{{ a.anioFabrica }}</td>
+                        <td class="td-c">{{ a.cantidadAsiento }}</td>
+                        <td><span class="badge b-tipo">{{ a.tipo }}</span></td>
+                        <td>{{ a.conductor || '—' }}</td>
+                        <td>
+                            <span class="badge" [class.b-ok]="a.estado==='activo'"
+                                [class.b-pend]="a.estado==='mantenimiento'" [class.b-err]="a.estado==='inactivo'">
+                                {{ a.estado }}
+                            </span>
+                        </td>
+                        <td class="td-act">
+                            <button class="btn-ico edit" (click)="editar(a)" title="Editar">✏️</button>
+                            <button class="btn-ico del" (click)="eliminar(a)" title="Eliminar">🗑️</button>
+                        </td>
+                    </tr>
+                    }
+                    @if (filtrados().length === 0) {
+                    <tr>
+                        <td colspan="9" class="td-empty">No hay vehículos registrados</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

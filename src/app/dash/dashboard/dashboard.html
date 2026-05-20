@@ -1,4 +1,4 @@
-<div class="dashboard-container">
+<br><br><br><br><div class="dashboard-container">
   <mat-toolbar color="primary" class="dashboard-toolbar shadow">
     <span>G7 Travel - Panel Administrativo</span>
     <span class="spacer"></span>
@@ -123,10 +123,11 @@
         </div>
         }
 
+@if (activeSection !== 'overview') {
         <div class="view-container">
           <router-outlet></router-outlet>
         </div>
-
+      }
       </mat-sidenav-content>
     </mat-sidenav-container>
   </div>

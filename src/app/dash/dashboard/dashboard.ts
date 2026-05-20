@@ -19,7 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
     FormsModule, 
     DatePipe, 
     DecimalPipe,
-    RouterModule, // Importante para la navegación de rutas hijas
+    RouterModule,
     MatToolbarModule,
     MatSidenavModule,
     MatListModule,
@@ -66,7 +66,6 @@ export class Dashboard implements OnInit {
     this.cargarPagos();
     this.cargarAutos();
     this.cargarAsientos();
-    // Nuevas cargas
     this.cargarPaquetes();
     this.cargarOfertas();
   }
@@ -124,7 +123,7 @@ export class Dashboard implements OnInit {
   setSection(section: string): void {
     this.activeSection = section;
     this.busqueda = '';
-    // Si estás usando rutas hijas en el Dashboard, añade esto:
+  
     this.router.navigate(['/dash', section]);
   }
 

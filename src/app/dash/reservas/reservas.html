@@ -16,7 +16,8 @@
                         <th>Cliente</th>
                         <th>Destino</th>
                         <th>Fechas</th>
-                        <th>Pasajeros</th>
+                        <th>DNI</th>
+                        <th>Asiento</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -33,7 +34,8 @@
                             <small>Ida: {{ r.fechaIda | date:'shortDate' }}</small><br>
                             <small>Vuelta: {{ r.fechaVuelta | date:'shortDate' }}</small>
                         </td>
-                        <td><strong>{{ r.pasajeros }}</strong></td>
+                        <td><strong>{{ r.dni || '-' }}</strong></td>
+                        <td>{{ r.notas || '-' }}</td>
                         <td class="td-act">
                             <button class="btn-ico del" (click)="eliminar(r)" title="Eliminar">
                                 🗑️
@@ -43,7 +45,7 @@
                     }
                     @if (filtrados().length === 0) {
                     <tr>
-                        <td colspan="6" class="td-empty">No hay reservas registradas</td>
+                        <td colspan="7" class="td-empty">No hay reservas registradas</td>
                     </tr>
                     }
                 </tbody>

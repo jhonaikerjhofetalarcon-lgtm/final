@@ -8,13 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record ReservaCreateRequest(
-    @NotBlank String nombre,
-    @NotBlank String apellido,
-    @NotBlank @Email String email,
-    @NotBlank String telefono,
-    @NotBlank String destino,
-    @NotNull LocalDate fechaIda,
-    @NotNull LocalDate fechaVuelta,
-    @Min(1) @Max(20) int pasajeros,
-    String notas) {}
-
+  @NotBlank String nombre,
+  @NotBlank String apellido,
+  @NotBlank @Email String email,
+  @NotBlank String telefono,
+  @NotBlank String destino,
+  @NotNull LocalDate fechaIda,
+  @NotNull LocalDate fechaVuelta,
+  @NotNull int dni,                    // ← cambiado
+  @NotBlank String idAsiento,         // ← nuevo
+  String notas) {}

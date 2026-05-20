@@ -78,6 +78,27 @@ export interface DestinoDto {
   name: string;
   bg: string;
   thumb: string;
+  idAuto?: string;
+}
+
+export interface DestinoCreatePayload {
+  label: string;
+  title: string;
+  desc?: string;
+  name: string;
+  bg?: string;
+  thumb?: string;
+  idAuto?: string;
+}
+
+export interface DestinoUpdatePayload {
+  label?: string;
+  title?: string;
+  desc?: string;
+  name?: string;
+  bg?: string;
+  thumb?: string;
+  idAuto?: string;
 }
 
 export interface TourDto {
@@ -121,7 +142,7 @@ export interface ReservaDto {
   destino: string;
   fechaIda: string;
   fechaVuelta: string;
-  pasajeros: number;
+  dni: number;
   clase: string;
   notas: string;
   createdAt: string;
@@ -135,7 +156,7 @@ export interface ReservaCreatePayload {
   destino: string;
   fechaIda: string;
   fechaVuelta: string;
-  pasajeros: number;
+  dni: number;
   clase: string;
   notas: string;
 }
@@ -212,6 +233,14 @@ export interface ContactoCreatePayload {
   mensaje: string;
 }
 
+interface Pasajero {
+  nombre: string;
+  apellido: string;
+  dni: number;
+  email: string;
+  telefono: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class G7ApiService {
   private readonly http = inject(HttpClient);
@@ -241,8 +270,20 @@ export class G7ApiService {
     return this.http.delete<void>(`${this.base}/users/${encodeURIComponent(id)}`);
   }
 
-  getDestinos(): Observable<DestinoDto[]> {
+getDestinos(): Observable<DestinoDto[]> {
     return this.http.get<DestinoDto[]>(`${this.base}/destinos`);
+  }
+
+  createDestino(body: DestinoCreatePayload): Observable<DestinoDto> {
+    return this.http.post<DestinoDto>(`${this.base}/destinos`, body);
+  }
+
+  updateDestino(id: string, body: DestinoUpdatePayload): Observable<DestinoDto> {
+    return this.http.put<DestinoDto>(`${this.base}/destinos/${encodeURIComponent(id)}`, body);
+  }
+
+  deleteDestino(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/destinos/${encodeURIComponent(id)}`);
   }
 
 
@@ -379,6 +420,12 @@ getAutos(): Observable<AutoDto[]> {
   deleteOferta(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/ofertas/${encodeURIComponent(id)}`);
   }
+
+  updateAsiento(id: string, body: any): Observable<AsientoDto> {
+  return this.http.put<AsientoDto>(`${this.base}/asientos/${encodeURIComponent(id)}`, body);
+}
+
+
 
 
 

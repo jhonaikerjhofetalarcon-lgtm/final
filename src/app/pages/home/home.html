@@ -1,261 +1,77 @@
 @if (apiOk === true) {
-  <p class="api-banner ok">Servidor conectado (API lista)</p>
+  <p class="api-banner ok">✅ Servidor conectado</p>
 }
 @if (apiOk === false) {
-  <p class="api-banner warn">Sin conexión al backend (inicia Spring en el puerto 8080)</p>
+  <p class="api-banner warn">⚠️ Sin conexión al backend</p>
 }
 
+<!-- HERO -->
 <div class="hero">
   <div class="hero-overlay"></div>
-  <img class="hero-img" src="https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg" alt="Turismo G7 Travel">
+  <img class="hero-img" src="https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg" alt="G7 Travel">
   <div class="hero-content">
-    <span class="hero-badge">✦ Descubre el Perú</span>
-    <h1 class="hero-title">TURISMO G7 TRAVEL</h1>
-    <p class="hero-sub">R&H S.A.C — Ayacucho, Perú</p>
-    <a routerLink="/destinos" class="hero-cta">Explorar Destinos</a>
+    <span class="hero-badge">✦ Vive el Perú Auténtico</span>
+    <h1 class="hero-title">G7 TRAVEL</h1>
+    <p class="hero-sub">Experiencias inolvidables desde Ayacucho</p>
+    <a routerLink="/reservas" class="hero-cta">Reservar Ahora</a>
   </div>
-  <div class="hero-scroll">↓</div>
 </div>
+
+<section class="filters-section">
+  <div class="filters-container">
+    <!-- Momento del día -->
+    <div class="filter-group">
+      <label>Momento del día</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" [(ngModel)]="filtro.manana"> Mañana</label>
+        <label><input type="checkbox" [(ngModel)]="filtro.tarde"> Tarde</label>
+        <label><input type="checkbox" [(ngModel)]="filtro.noche"> Noche</label>
+      </div>
+    </div>
+
+    <!-- Precio -->
+    <div class="filter-group">
+      <label>Precio (S/)</label>
+      <div class="price-range">
+        <input type="range" min="0" max="2000" [(ngModel)]="filtro.precioMax" (input)="filtrar()">
+        <span>S/ 0 - S/{{ filtro.precioMax }}</span>
+      </div>
+    </div>
+
+    <!-- Duración -->
+    <div class="filter-group">
+      <label>Duración</label>
+      <select [(ngModel)]="filtro.duracion" (ngModelChange)="filtrar()">
+        <option value="">Cualquier duración</option>
+        <option value="1">Hasta 1 día</option>
+        <option value="3">1 a 3 días</option>
+        <option value="7">Más de 3 días</option>
+      </select>
+    </div>
+  </div>
+</section>
 
 <section class="seccion-destinos">
   <div class="seccion-header">
-    <span class="etiqueta">Nuestros Destinos</span>
-    <h2 class="seccion-titulo">Bienvenido a G7 Travel</h2>
-    <p class="seccion-desc">Vive experiencias únicas en los destinos más hermosos del Perú</p>
+    <h2>{{ destinosFiltrados.length }} Experiencias en Ayacucho y Perú</h2>
   </div>
 
   <div class="grid-destinos">
-
-    <div class="card-destino card-grande">
-      <a routerLink="/reservas">
-        <img src="https://www.ytuqueplanes.com/imagenes/fotos/novedades/sierra-pampa-quinua.JPG" alt="Pampa de Quinua">
-        <div class="card-info">
-          <span class="card-tag">Ayacucho</span>
-          <h3>Pampa de Quinua</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 150</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="card-destino">
-      <a routerLink="/reservas">
-        <img src="https://images.pexels.com/photos/259967/pexels-photo-259967.jpeg" alt="Machu Picchu">
-        <div class="card-info">
-          <span class="card-tag">Cusco</span>
-          <h3>Machu Picchu</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 250</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="card-destino">
-      <a routerLink="/reservas">
-        <img src="https://images.pexels.com/photos/21014/pexels-photo.jpg" alt="Cusco">
-        <div class="card-info">
-          <span class="card-tag">Sur del Perú</span>
-          <h3>Cusco</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 180</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="card-destino">
-      <a routerLink="/reservas">
-        <img src="https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg" alt="Lago Titicaca">
-        <div class="card-info">
-          <span class="card-tag">Puno</span>
-          <h3>Lago Titicaca</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 200</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="card-destino">
-      <a routerLink="/reservas">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4qHUBk0VGAdXrmJiwT98ksH9f9KWWm7Sicw&s" alt="Sarhua">
-        <div class="card-info">
-          <span class="card-tag">Ayacucho</span>
-          <h3>Sarhua</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 150</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="card-destino card-grande">
-      <a routerLink="/reservas">
-        <img src="https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg" alt="Lago Titicaca">
-        <div class="card-info">
-          <span class="card-tag">Puno</span>
-          <h3>Lago Titicaca</h3>
-          <div class="card-footer">
-            <span class="precio">S/ 200</span>
-            <span class="btn-ver">Reservar →</span>
-          </div>
-        </div>
-      </a>
-
-
-      
-    </div>
-
-  </div>
-
-    <section class="seccion-grafico">
-      <div class="seccion-header">
-        <span class="etiqueta">Estadísticas</span>
-        <h2 class="seccion-titulo">Destinos más Populares</h2>
-        <p class="seccion-desc">Lugares preferidos por nuestros viajeros este año</p>
-      </div>
-
-      <div class="grafico-contenedor">
-        <div class="grafico-wrapper">
-
-          <div class="eje-y">
-            <span>500</span>
-            <span>400</span>
-            <span>300</span>
-            <span>200</span>
-            <span>100</span>
-            <span>0</span>
-          </div>
-
-          <div class="grafico-area">
-            <div class="lineas-guia">
-              <div class="linea"></div>
-              <div class="linea"></div>
-              <div class="linea"></div>
-              <div class="linea"></div>
-              <div class="linea"></div>
-            </div>
-
-            <div class="barras">
-
-              <div class="barra-grupo">
-                <div class="barra-wrap">
-                  <span class="barra-valor">487</span>
-                  <div class="barra" style="--h: 97%; --color: #c0392b;">
-                    <div class="barra-brillo"></div>
-                  </div>
-                </div>
-                <span class="barra-label">Machu<br>Picchu</span>
-              </div>
-
-              <div class="barra-grupo">
-                <div class="barra-wrap">
-                  <span class="barra-valor">342</span>
-                  <div class="barra" style="--h: 68%; --color: #e74c3c;">
-                    <div class="barra-brillo"></div>
-                  </div>
-                </div>
-                <span class="barra-label">Lago<br>Titicaca</span>
-              </div>
-
-              <div class="barra-grupo">
-                <div class="barra-wrap">
-                  <span class="barra-valor">298</span>
-                  <div class="barra" style="--h: 60%; --color: #922b21;">
-                    <div class="barra-brillo"></div>
-                  </div>
-                </div>
-                <span class="barra-label">Cusco</span>
-              </div>
-
-              <div class="barra-grupo">
-                <div class="barra-wrap">
-                  <span class="barra-valor">215</span>
-                  <div class="barra" style="--h: 43%; --color: #e74c3c;">
-                    <div class="barra-brillo"></div>
-                  </div>
-                </div>
-                <span class="barra-label">Pampa de<br>Quinua</span>
-              </div>
-
-              <div class="barra-grupo">
-                <div class="barra-wrap">
-                  <span class="barra-valor">143</span>
-                  <div class="barra" style="--h: 29%; --color: #c0392b;">
-                    <div class="barra-brillo"></div>
-                  </div>
-                </div>
-                <span class="barra-label">Sarhua</span>
-              </div>
-
+    @for (d of destinosFiltrados; track d.id) {
+      <div class="card-destino">
+        <a [routerLink]="['/reservas']" (click)="seleccionarDestino(d)">
+          <img [src]="d.bg || 'https://via.placeholder.com/600x400?text='+d.title" [alt]="d.title">
+          <div class="card-info">
+            <span class="card-tag">{{ d.label }}</span>
+            <h3>{{ d.title }}</h3>
+            <p class="card-desc">{{ d.desc }}</p>
+            <div class="card-footer">
+              <span class="precio">Desde S/ 120</span>
+              <span class="btn-ver">Ver Detalles →</span>
             </div>
           </div>
-        </div>
-
-        <div class="grafico-leyenda">
-          <div class="leyenda-item">
-            <span class="leyenda-dot" style="background:#c0392b;"></span>
-            <span>Más de 400 reservas — Destino estrella</span>
-          </div>
-          <div class="leyenda-item">
-            <span class="leyenda-dot" style="background:#e74c3c;"></span>
-            <span>200–400 reservas — Muy popular</span>
-          </div>
-          <div class="leyenda-item">
-            <span class="leyenda-dot" style="background:#922b21;"></span>
-            <span>Menos de 200 reservas — En crecimiento</span>
-          </div>
-        </div>
-
-        <div class="grafico-podio">
-          <div class="podio-item">
-            <span class="podio-medalla">🥇</span>
-            <span class="podio-lugar">Machu Picchu</span>
-            <span class="podio-num">487 viajeros</span>
-          </div>
-          <div class="podio-item">
-            <span class="podio-medalla">🥈</span>
-            <span class="podio-lugar">Lago Titicaca</span>
-            <span class="podio-num">342 viajeros</span>
-          </div>
-          <div class="podio-item">
-            <span class="podio-medalla">🥉</span>
-            <span class="podio-lugar">Cusco</span>
-            <span class="podio-num">298 viajeros</span>
-          </div>
-        </div>
-
+        </a>
       </div>
-    </section>
-
-
-
-
-
-</section>
-
-<section class="banner-stats">
-  <div class="stat">
-    <span class="stat-num">+500</span>
-    <span class="stat-label">Viajeros felices</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">12</span>
-    <span class="stat-label">Destinos únicos</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">8</span>
-    <span class="stat-label">Años de experiencia</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">100%</span>
-    <span class="stat-label">Clientes satisfechos</span>
+    }
   </div>
 </section>

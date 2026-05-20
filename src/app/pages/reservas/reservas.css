@@ -1,173 +1,251 @@
 .reservas-wrapper {
   max-width: 1100px;
-  margin: auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  margin: 0 auto;
+  padding: 20px 15px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-/* ---------------- FORM CARD ---------------- */
-.form-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 25px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+/* Header del formulario */
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-/* ---------------- HEADER ---------------- */
 .form-header h1 {
-  margin: 0;
-  font-size: 28px;
-  color: #222;
+  font-size: 2.2rem;
+  color: #1e3a8a;
+  margin-bottom: 8px;
 }
 
 .form-header p {
-  color: #666;
-  margin-bottom: 20px;
+  color: #64748b;
+  font-size: 1.1rem;
 }
 
-/* ---------------- INPUTS ---------------- */
-.form-group {
-  margin-bottom: 15px;
-}
-
-input, select, textarea {
+/* Select de Destino */
+.destino-select {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  transition: 0.3s;
+  padding: 14px 16px;
+  font-size: 1.1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  margin-bottom: 25px;
+}
+
+.destino-select:focus {
   outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
+/* Contenedor del Bus */
+.bus-container {
+  background: #1e2937;
+  border-radius: 28px;
+  padding: 30px 20px;
+  margin: 25px auto;
+  max-width: 420px;
+  border: 10px solid #0f172a;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* ---------------- BOTÓN ---------------- */
-.btn-primary {
-  background: linear-gradient(135deg, #4a90e2, #2563eb);
+.front-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+  padding: 0 20px;
+}
+
+.conductor-box {
+  background: #334155;
   color: white;
-  padding: 12px 18px;
-  border: none;
+  padding: 10px 18px;
   border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(37,99,235,0.3);
-}
-
-/* ---------------- SEAT SECTION ---------------- */
-.seat-section {
-  margin-top: 25px;
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 16px;
-  text-align: center;
-}
-
-.seat-section h3 {
-  margin-bottom: 15px;
-  color: #333;
-}
-
-/* ---------------- BUS ---------------- */
-.bus {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-/* ---------------- FILA ---------------- */
-.fila {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-/* pasillo */
-.pasillo {
-  width: 25px;
-}
-
-/* ---------------- ASIENTOS ---------------- */
+/* Asientos */
 .asiento {
-  width: 45px;
-  height: 45px;
+  width: 54px;
+  height: 54px;
   background: #22c55e;
-  color: white;
-  font-size: 13px;
-  font-weight: bold;
-  border-radius: 10px;
+  color: #0f172a;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border: 4px solid #0f172a;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.asiento:hover {
-  transform: scale(1.1);
-  background: #16a34a;
+.asiento:hover:not(.ocupado) {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
 }
 
-/* ocupado */
 .asiento.ocupado {
   background: #ef4444;
   cursor: not-allowed;
-  opacity: 0.9;
-}
-
-.asiento.ocupado:hover {
+  opacity: 0.75;
   transform: none;
 }
 
-/* seleccionado */
 .asiento.seleccionado {
-  background: #3b82f6;
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(59,130,246,0.5);
+  background: #eab308;
+  color: #1e2937;
+  transform: scale(1.12);
 }
 
-/* ---------------- LEYENDA ---------------- */
+.asiento.copiloto {
+  width: 58px;
+  height: 58px;
+  font-size: 1.1rem;
+}
+
+/* Filas */
+.asientos-principales {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fila {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 15px;
+}
+
+/* Leyenda */
 .leyenda {
-  margin-top: 15px;
   display: flex;
   justify-content: center;
-  gap: 20px;
-  font-size: 14px;
-  color: #444;
+  gap: 25px;
+  margin: 25px 0;
+  flex-wrap: wrap;
 }
 
 .caja {
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  border-radius: 4px;
-  margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #475569;
 }
 
-.libre { background: #22c55e; }
-.ocupado { background: #ef4444; }
-.seleccionado { background: #3b82f6; }
-
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.caja::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
 }
 
-.form-card {
-  animation: fadeIn 0.5s ease;
+.libre::before { background: #22c55e; }
+.ocupado::before { background: #ef4444; }
+.seleccionado::before { background: #eab308; }
+
+/* Botón grande */
+.btn-large {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 15px;
+  border-radius: 12px;
 }
 
-.seat-section {
-  animation: fadeIn 0.5s ease;
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 25px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+}
+
+.modal h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1e40af;
+}
+
+.pasajero-form {
+  background: #f8fafc;
+  padding: 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.pasajero-form h4 {
+  margin: 0 0 12px 0;
+  color: #334155;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.form-grid input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn-secondary {
+  background: #64748b;
+  color: white;
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.success-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f0fdf4;
+  border-radius: 20px;
+  border: 2px solid #86efac;
+}
+
+.success-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
 }

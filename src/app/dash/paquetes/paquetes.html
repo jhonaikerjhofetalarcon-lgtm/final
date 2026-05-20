@@ -11,7 +11,7 @@
         <div class="col-md-4 col-lg-3">
             <mat-card class="package-card shadow-sm h-100">
                 <div class="position-relative">
-                    <img mat-card-image [src]="item.imagenes || '../../../public/favorito.ico'" class="card-img">
+                    <img mat-card-image [src]="item.imagenes || ''" class="card-img">
                     @if (item.oferta) {
                     <span class="badge-discount">-{{ item.oferta.descuento }}%</span>
                     }

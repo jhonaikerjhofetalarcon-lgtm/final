@@ -1,9 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { G7ApiService, AutoDto } from '../../core/g7-api.service';
-
-
+import { G7ApiService, AutoDto, UserDto } from '../../core/g7-api.service';
 
 @Component({
   selector: 'app-autos',
@@ -13,87 +11,113 @@ import { G7ApiService, AutoDto } from '../../core/g7-api.service';
   styleUrls: ['./autos.css'],
 })
 export class Autos implements OnInit {
-  private readonly api = inject(G7ApiService);
+  private api = inject(G7ApiService);
 
   busqueda = '';
-  error: string | null = null;
-  successMsg: string | null = null;
   formVisible = false;
   editingId: string | null = null;
 
   autos: AutoDto[] = [];
-  fAuto: AutoDto = this.empty();
+  conductores: UserDto[] = [];   // ← Nuevos conductores
 
-  ngOnInit(): void { this.cargar(); }
+  fAuto: any = this.emptyAuto();
 
-  cargar(): void {
-    (this.api as any).getAutos?.().subscribe({ next: (d: any) => this.autos = d, error: () => {} });
+  ngOnInit() {
+    this.cargarTodo();
   }
 
-  abrir(): void {
+  cargarTodo() {
+    // Cargar vehículos
+    this.api.getAutos().subscribe({
+      next: (data) => this.autos = data,
+      error: () => console.error('Error al cargar vehículos')
+    });
+
+    // Cargar conductores (usuarios con rol 'conductor')
+    this.api.getUsers().subscribe({
+      next: (users) => {
+        this.conductores = users.filter(u => u.rol === 'conductor');
+      },
+      error: () => console.error('Error al cargar conductores')
+    });
+  }
+
+  abrirNuevo() {
     this.editingId = null;
-    this.fAuto = this.empty();
+    this.fAuto = this.emptyAuto();
     this.formVisible = true;
-    this.error = null;
   }
 
-  abrirEditar(a: AutoDto): void {
-    this.editingId = a.id;
-    this.fAuto = { ...a };
+  editar(auto: AutoDto) {
+    this.editingId = auto.id;
+    this.fAuto = { ...auto };
     this.formVisible = true;
-    this.error = null;
   }
 
-  cerrar(): void { this.formVisible = false; this.editingId = null; this.error = null; }
-
-  guardar(): void {
+  guardar() {
     if (!this.fAuto.placa?.trim() || !this.fAuto.marca?.trim()) {
-      this.error = 'Placa y marca son obligatorios.';
+      alert('Placa y Marca son obligatorios');
       return;
     }
-    this.error = null;
 
-    const call = this.editingId
-      ? (this.api as any).updateAuto?.(this.editingId, this.fAuto)
-      : (this.api as any).createAuto?.(this.fAuto);
+    const payload = { ...this.fAuto };
+    delete payload.id; // No enviar id en create
 
-    call?.subscribe?.({
-      next: () => { this.cerrar(); this.cargar(); this.flash('✓ Vehículo guardado'); },
-      error: () => { this.error = 'No se pudo guardar el vehículo.'; },
+    const operacion = this.editingId
+      ? this.api.updateAuto(this.editingId, payload)
+      : this.api.createAuto(payload);
+
+    operacion.subscribe({
+      next: () => {
+        this.flash('✅ Vehículo guardado correctamente');
+        this.cerrarForm();
+        this.cargarTodo();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error al guardar el vehículo');
+      }
     });
   }
 
-  eliminar(a: AutoDto): void {
-    if (!confirm(`¿Eliminar el vehículo ${a.placa}?`)) return;
-    (this.api as any).deleteAuto?.(a.id).subscribe({
-      next: () => { this.cargar(); this.flash('🗑 Vehículo eliminado'); },
-      error: () => { this.error = 'No se pudo eliminar.'; },
+  eliminar(auto: AutoDto) {
+    if (!confirm(`¿Eliminar el vehículo ${auto.placa}?`)) return;
+    this.api.deleteAuto(auto.id).subscribe({
+      next: () => this.cargarTodo(),
+      error: () => alert('No se pudo eliminar')
     });
   }
 
-  filtrados(): AutoDto[] {
-    const q = this.busqueda.toLowerCase();
-    return q ? this.autos.filter(a =>
+  cerrarForm() {
+    this.formVisible = false;
+    this.editingId = null;
+  }
+
+  filtrados() {
+    const q = this.busqueda.toLowerCase().trim();
+    if (!q) return this.autos;
+
+    return this.autos.filter(a =>
       a.placa.toLowerCase().includes(q) ||
       a.marca.toLowerCase().includes(q) ||
-      a.modelo.toLowerCase().includes(q)
-    ) : this.autos;
+      a.modelo?.toLowerCase().includes(q) ||
+      a.conductor?.toLowerCase().includes(q)
+    );
   }
 
-  private flash(msg: string): void {
-    this.successMsg = msg;
-    setTimeout(() => (this.successMsg = null), 3000);
+  private flash(msg: string) {
+    // Puedes mejorar esto con un mensaje temporal si quieres
+    console.log(msg);
   }
 
-  private empty(): AutoDto {
+  private emptyAuto() {
     return {
-      id: '',
       placa: '',
       marca: '',
       modelo: '',
       color: '',
       anioFabrica: new Date().getFullYear(),
-      cantidadAsiento: 12,
+      cantidadAsiento: 15,
       tipo: 'minivan',
       conductor: '',
       estado: 'activo'

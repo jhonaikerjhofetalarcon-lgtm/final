@@ -1,92 +1,89 @@
-        <section class="section-content">
+<section class="section-content">
+    <div class="toolbar">
+        <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input class="search-input" type="text" [(ngModel)]="busqueda" placeholder="Buscar asiento…">
+        </div>
+        <button class="btn-primary" (click)="abrirNuevo()">+ Nuevo Asiento</button>
+    </div>
 
-            <div class="toolbar">
-                <div class="search-wrap">
-                    <span class="si">🔍</span>
-                    <input class="search-input" type="text" [(ngModel)]="busqueda" placeholder="Buscar asiento…">
-                </div>
-                <button class="btn-primary" (click)="abrir()">+ Nuevo Asiento</button>
-            </div>    
-
-            @if (formVisible) {
-            <div class="form-card">
-                <h3>Nuevo Asiento</h3>
-                <div class="form-grid">
-                    <div class="fg"><label>Vehículo <span class="req">*</span></label>
-                        <select [(ngModel)]="fAsiento.idAuto">
-                            <option value="">-- Seleccionar --</option>
-                            @for (a of autos; track a.id) {
-                            <option [value]="a.id">{{ a.placa }} – {{ a.marca }} {{ a.modelo }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="fg"><label>Número de asiento <span class="req">*</span></label>
-                        <input type="text" [(ngModel)]="fAsiento.numeroAsiento" placeholder="A1, B3, C2…">
-                    </div>
-                    <div class="fg"><label>Estado</label>
-                        <select [(ngModel)]="fAsiento.estado">
-                            <option value="libre">Libre</option>
-                            <option value="reservado">Reservado</option>
-                            <option value="ocupado">Ocupado</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-cancel" (click)="cerrar()">Cancelar</button>
-                    <button class="btn-save" (click)="guardar()">Crear Asiento</button>
-                </div>
+    <!-- FORMULARIO -->
+    @if (formVisible) {
+    <div class="form-card">
+        <h3>{{ editingId ? 'Editar Asiento' : 'Nuevo Asiento' }}</h3>
+        <div class="form-grid">
+            <div class="fg">
+                <label>Vehículo <span class="req">*</span></label>
+                <select [(ngModel)]="fAsiento.idAuto">
+                    <option value="">-- Seleccionar Vehículo --</option>
+                    @for (a of autos; track a.id) {
+                    <option [value]="a.id">{{ a.placa }} - {{ a.marca }} {{ a.modelo }}</option>
+                    }
+                </select>
             </div>
-            }
-
-            <div class="table-card">
-                <div class="table-wrap">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Asiento</th>
-                                <th>Vehículo (Placa)</th>
-                                <th>Reserva</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (s of filtrados(); track s.id; let i = $index) {
-                            <tr>
-                                <td class="td-n">{{ i+1 }}</td>
-                                <td><strong>{{ s.numeroAsiento }}</strong></td>
-                                <td><code>{{ placaDeAuto(s.idAuto) }}</code></td>
-                                <td><code>{{ s.idReserva ? (s.idReserva | slice:0:10)+'…' : '—' }}</code></td>
-                                <td><span class="badge" [class.b-ok]="s.estado==='libre'"
-                                        [class.b-pend]="s.estado==='reservado'" [class.b-err]="s.estado==='ocupado'">{{
-                                        s.estado }}</span></td>
-                                <td class="td-act">
-                                    @if (s.estado !== 'libre') {
-                                    <button class="btn-ico edit" (click)="liberar(s)"
-                                        title="Liberar asiento">🔓</button>
-                                    }
-                                    <button class="btn-ico del" (click)="eliminar(s)"
-                                        title="Eliminar">🗑️</button>
-                                </td>
-                            </tr>
-                            }
-                            @if (filtrados().length === 0) {
-                            <tr>
-                                <td colspan="6" class="td-empty">No hay asientos registrados</td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+            <div class="fg">
+                <label>Número de Asiento <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="fAsiento.numeroAsiento" placeholder="A1, B5, 15...">
             </div>
-
-            <div class="mini-stats">
-                <div class="ms"><span>{{ asientos.length }}</span>Total</div>
-                <div class="ms"><span>{{ libres() }}</span>Libres</div>
-                <div class="ms"><span>{{ reservados() }}</span>Reservados</div>
-                <div class="ms"><span>{{ ocupados() }}</span>Ocupados</div>
+            <div class="fg">
+                <label>Estado</label>
+                <select [(ngModel)]="fAsiento.estado">
+                    <option value="libre">Libre</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="ocupado">Ocupado</option>
+                </select>
             </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-cancel" (click)="cerrarForm()">Cancelar</button>
+            <button class="btn-save" (click)="guardar()">Guardar</button>
+        </div>
+    </div>
+    }
 
-        </section>
-        
+    <!-- TABLA -->
+    <div class="table-card">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Asiento</th>
+                        <th>Vehículo</th>
+                        <th>Estado</th>
+                        <th>Reserva</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (s of filtrados(); track s.id; let i = $index) {
+                    <tr>
+                        <td class="td-n">{{ i+1 }}</td>
+                        <td><strong>{{ s.numeroAsiento }}</strong></td>
+                        <td>{{ placaDeAuto(s.idAuto) }}</td>
+                        <td>
+                            <span class="badge" [class.b-ok]="s.estado==='libre'"
+                                [class.b-pend]="s.estado==='reservado'" [class.b-err]="s.estado==='ocupado'">
+                                {{ s.estado }}
+                            </span>
+                        </td>
+                        <td>{{ s.idReserva ? 'Asignado' : '—' }}</td>
+                        <td class="td-act">
+                            <button class="btn-ico edit" (click)="editar(s)" title="Editar">✏️</button>
+                            @if (s.estado !== 'libre') {
+                            <button class="btn-ico" (click)="liberar(s)" title="Liberar">🔓</button>
+                            }
+                            <button class="btn-ico del" (click)="eliminar(s)" title="Eliminar">🗑️</button>
+                        </td>
+                    </tr>
+                    }
+                    @if (filtrados().length === 0) {
+                    <tr>
+                        <td colspan="6" class="td-empty">No hay asientos registrados</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

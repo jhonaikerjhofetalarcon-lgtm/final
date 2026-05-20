@@ -1,106 +1,98 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, SlicePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { G7ApiService, AsientoDto, AsientoCreatePayload, AutoDto } from '../../core/g7-api.service';
 
 @Component({
   selector: 'app-asientos',
   standalone: true,
-  imports: [CommonModule, FormsModule, SlicePipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './asientos.html',
   styleUrls: ['./asientos.css'],
 })
 export class Asientos implements OnInit {
-  private readonly api = inject(G7ApiService);
+  private api = inject(G7ApiService);
 
-  // Propiedades usadas en el HTML
   busqueda = '';
-  error: string | null = null;
-  successMsg: string | null = null;
   formVisible = false;
+  editingId: string | null = null;
 
   asientos: AsientoDto[] = [];
   autos: AutoDto[] = [];
 
-  fAsiento: AsientoCreatePayload = this.empty();
+  fAsiento: AsientoCreatePayload = { idAuto: '', numeroAsiento: '', estado: 'libre' };
 
-  ngOnInit(): void { this.cargar(); }
-
-  cargar(): void {
-    (this.api as any).getAsientos?.().subscribe({ 
-      next: (d: any) => this.asientos = d, 
-      error: () => {} 
-    });
-
-    (this.api as any).getAutos?.().subscribe({ 
-      next: (d: any) => this.autos = d, 
-      error: () => {} 
-    });
+  ngOnInit() {
+    this.cargarTodo();
   }
 
-  abrir(): void {
-    this.fAsiento = this.empty();
+  async cargarTodo() {
+    this.asientos = await this.api.getAsientos().toPromise() || [];
+    this.autos = await this.api.getAutos().toPromise() || [];
+  }
+
+  abrirNuevo() {
+    this.editingId = null;
+    this.fAsiento = { idAuto: '', numeroAsiento: '', estado: 'libre' };
     this.formVisible = true;
-    this.error = null;
   }
 
-  cerrar(): void {
-    this.formVisible = false;
-    this.error = null;
+  editar(s: AsientoDto) {
+    this.editingId = s.id;
+    this.fAsiento = {
+      idAuto: s.idAuto,
+      numeroAsiento: s.numeroAsiento,
+      estado: s.estado
+    };
+    this.formVisible = true;
   }
 
-  guardar(): void {
+  async guardar() {
     if (!this.fAsiento.idAuto || !this.fAsiento.numeroAsiento?.trim()) {
-      this.error = 'Vehículo y número de asiento son obligatorios.';
+      alert('Vehículo y número de asiento son obligatorios');
       return;
     }
 
-    this.error = null;
-
-    (this.api as any).createAsiento?.(this.fAsiento).subscribe({
-      next: () => {
-        this.cerrar();
-        this.cargar();
-        this.flash('✓ Asiento creado');
-      },
-      error: () => { this.error = 'No se pudo crear el asiento.'; },
-    });
+    try {
+      if (this.editingId) {
+        // Actualizar
+        await this.api.updateAsiento?.(this.editingId, this.fAsiento).toPromise(); // Asegúrate que exista este método en el servicio
+      } else {
+        // Crear
+        await this.api.createAsiento(this.fAsiento).toPromise();
+      }
+      this.cerrarForm();
+      this.cargarTodo();
+    } catch (e) {
+      alert('Error al guardar el asiento');
+    }
   }
 
-  liberar(s: AsientoDto): void {
-    (this.api as any).liberarAsiento?.(s.id).subscribe({
-      next: () => { this.cargar(); this.flash('✓ Asiento liberado'); },
-      error: () => { this.error = 'No se pudo liberar.'; },
-    });
+  cerrarForm() {
+    this.formVisible = false;
+    this.editingId = null;
   }
 
-  eliminar(s: AsientoDto): void {
-    if (!confirm('¿Eliminar este asiento?')) return;
-    (this.api as any).deleteAsiento?.(s.id).subscribe({
-      next: () => { this.cargar(); this.flash('🗑 Asiento eliminado'); },
-      error: () => { this.error = 'No se pudo eliminar.'; },
-    });
+  liberar(s: AsientoDto) {
+    if (confirm('¿Liberar este asiento?')) {
+      this.api.liberarAsiento(s.id).subscribe(() => this.cargarTodo());
+    }
   }
 
-  filtrados(): AsientoDto[] {
+  eliminar(s: AsientoDto) {
+    if (confirm(`¿Eliminar asiento ${s.numeroAsiento}?`)) {
+      this.api.deleteAsiento(s.id).subscribe(() => this.cargarTodo());
+    }
+  }
+
+  filtrados() {
     const q = this.busqueda.toLowerCase();
-    return q ? this.asientos.filter(s => s.numeroAsiento.toLowerCase().includes(q)) : this.asientos;
+    return q ? this.asientos.filter(s => 
+      s.numeroAsiento.toLowerCase().includes(q)
+    ) : this.asientos;
   }
 
   placaDeAuto(idAuto: string): string {
     return this.autos.find(a => a.id === idAuto)?.placa ?? '—';
-  }
-
-  libres(): number     { return this.asientos.filter(s => s.estado === 'libre').length; }
-  reservados(): number { return this.asientos.filter(s => s.estado === 'reservado').length; }
-  ocupados(): number   { return this.asientos.filter(s => s.estado === 'ocupado').length; }
-
-  private flash(msg: string): void {
-    this.successMsg = msg;
-    setTimeout(() => (this.successMsg = null), 3000);
-  }
-
-  private empty(): AsientoCreatePayload {
-    return { idAuto: '', numeroAsiento: '', estado: 'libre' };
   }
 }

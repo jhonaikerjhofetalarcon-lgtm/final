@@ -37,9 +37,11 @@ public class ReservaService {
     e.setDestino(req.destino());
     e.setFechaIda(req.fechaIda());
     e.setFechaVuelta(req.fechaVuelta());
-    e.setPasajeros(req.pasajeros());
+    e.setDni(req.dni());
+    e.setIdAsiento(req.idAsiento());
     e.setNotas(req.notas());
     e.setCreatedAt(Instant.now());
+
     return ReservaResponse.from(repo.save(e));
   }
 
