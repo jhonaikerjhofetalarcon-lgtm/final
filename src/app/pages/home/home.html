@@ -59,18 +59,19 @@
   <div class="grid-destinos">
     @for (d of destinosFiltrados; track d.id) {
       <div class="card-destino">
-        <a [routerLink]="['/reservas']" (click)="seleccionarDestino(d)">
-          <img [src]="d.bg || 'https://via.placeholder.com/600x400?text='+d.title" [alt]="d.title">
-          <div class="card-info">
-            <span class="card-tag">{{ d.label }}</span>
-            <h3>{{ d.title }}</h3>
-            <p class="card-desc">{{ d.desc }}</p>
-            <div class="card-footer">
-              <span class="precio">Desde S/ 120</span>
-              <span class="btn-ver">Ver Detalles →</span>
-            </div>
+        <img [src]="d.bg || 'https://via.placeholder.com/600x400?text='+d.title" [alt]="d.title">
+        <div class="card-info">
+          <span class="card-tag">{{ d.label }}</span>
+          <h3>{{ d.title }}</h3>
+          <p class="card-desc">{{ d.desc }}</p>
+          <div class="card-footer">
+            <span class="precio">Desde S/ 120</span>
+            <span class="card-actions">
+              <a [routerLink]="['/destinos', d.id]" class="btn-ver">Detalles</a>
+              <a [routerLink]="['/reservas']" [queryParams]="{ destinoId: d.id }" class="btn-ver" (click)="seleccionarDestino(d)">Reservar</a>
+            </span>
           </div>
-        </a>
+        </div>
       </div>
     }
   </div>

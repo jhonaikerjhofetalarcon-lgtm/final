@@ -21,6 +21,21 @@ export const routes: Routes = [
   },
 
   {
+    path: 'destinos/:id',
+    loadComponent: () => import('./pages/destino-detalle/destino-detalle').then(m => m.DestinoDetalle),
+  },
+
+  {
+    path: 'paquetes',
+    loadComponent: () => import('./pages/paquetes/paquetes').then(m => m.PaquetesPublicos),
+  },
+
+  {
+    path: 'paquetes/:id',
+    loadComponent: () => import('./pages/paquete-detalle/paquete-detalle').then(m => m.PaqueteDetalle),
+  },
+
+  {
     path: 'reservas',
     loadComponent: () => import('./pages/reservas/reservas').then(m => m.Reservas),
   },
@@ -28,6 +43,11 @@ export const routes: Routes = [
   {
     path: 'contacto',
     loadComponent: () => import('./pages/contacto/contacto').then(m => m.Contacto),
+  },
+
+  {
+    path: 'nosotros',
+    loadComponent: () => import('./pages/nosotros/nosotros').then(m => m.Nosotros),
   },
 
   // ====================== DASHBOARD ADMIN (Protegido) ======================

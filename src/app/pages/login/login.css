@@ -10,6 +10,31 @@
     display: flex;
     min-height: 100vh;
     font-family: 'DM Sans', sans-serif;
+    position: relative;
+}
+
+.back-home {
+    position: fixed;
+    top: 22px;
+    left: 24px;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    transition: transform .2s ease, background .2s ease;
+}
+
+.back-home:hover {
+    transform: translateX(-2px);
+    background: rgba(192, 57, 43, 0.82);
 }
 
 /* ── PANEL IZQUIERDO ── */
@@ -328,6 +353,13 @@
     .login-form-side {
         width: 100%;
         min-width: unset;
+    }
+
+    .back-home {
+        color: #c0392b;
+        background: #fff;
+        border-color: #f0d8d5;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
     }
 
     .login-logo-mobile {

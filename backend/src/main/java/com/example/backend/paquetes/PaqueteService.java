@@ -16,19 +16,40 @@ public class PaqueteService {
     return repository.findAll().stream().map(PaqueteResponse::from).toList();
   }
 
+  public PaqueteResponse getById(String id) {
+    return PaqueteResponse.from(repository.getOrThrow(id));
+  }
+
   public PaqueteResponse create(PaqueteCreateRequest req) {
     PaqueteEntity e = new PaqueteEntity();
     e.setId(UUID.randomUUID().toString());
-    e.setTitulo(req.titulo());
-    e.setDescripcion(req.descripcion());
-    e.setPresio(req.presio());
-    e.setId_paquete(req.id_paquete());
-    e.setImagenes(req.imagenes());
-    e.setEstado(false); // Por defecto false según tu requerimiento
+    applyRequest(e, req);
+    e.setEstado(req.estado() != null ? req.estado() : true);
+    return PaqueteResponse.from(repository.save(e));
+  }
+
+  public PaqueteResponse update(String id, PaqueteCreateRequest req) {
+    PaqueteEntity e = repository.getOrThrow(id);
+    applyRequest(e, req);
+    e.setEstado(req.estado() != null ? req.estado() : Boolean.TRUE.equals(e.getEstado()));
+    return PaqueteResponse.from(repository.save(e));
+  }
+
+  public PaqueteResponse toggleEstado(String id) {
+    PaqueteEntity e = repository.getOrThrow(id);
+    e.setEstado(!Boolean.TRUE.equals(e.getEstado()));
     return PaqueteResponse.from(repository.save(e));
   }
 
   public void delete(String id) {
     repository.deleteById(id);
+  }
+
+  private void applyRequest(PaqueteEntity e, PaqueteCreateRequest req) {
+    e.setTitulo(req.titulo());
+    e.setDescripcion(req.descripcion());
+    e.setPresio(req.presio());
+    e.setId_paquete(req.id_paquete());
+    e.setImagenes(req.imagenes());
   }
 }

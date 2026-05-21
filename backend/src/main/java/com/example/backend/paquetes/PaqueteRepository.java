@@ -28,6 +28,10 @@ public class PaqueteRepository {
     return doc.exists() ? Optional.of(toEntity(doc)) : Optional.empty();
   }
 
+  public PaqueteEntity getOrThrow(String id) {
+    return findById(id).orElseThrow(() -> new java.util.NoSuchElementException("Paquete no encontrado: " + id));
+  }
+
   public PaqueteEntity save(PaqueteEntity e) {
     Map<String, Object> data = new HashMap<>();
     data.put("titulo", e.getTitulo());

@@ -1,14 +1,13 @@
 <div class="reservas-wrapper">
-
   @if (errorApi) {
     <p class="api-error">{{ errorApi }}</p>
   }
 
   @if (enviado) {
     <div class="success-card">
-      <div class="success-icon">✅</div>
-      <h2>¡Reserva confirmada!</h2>
-      <p>Se han registrado {{ reservasConfirmadas }} asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
+      <div class="success-icon">OK</div>
+      <h2>Reserva confirmada</h2>
+      <p>Se registraron {{ reservasConfirmadas }} asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
       <button class="btn-primary" (click)="nuevaReserva()">Hacer otra reserva</button>
     </div>
   }
@@ -17,14 +16,18 @@
     <div class="form-card">
       <div class="form-header">
         <h1>Reserva tu Viaje</h1>
-        <p>Elige tu destino y selecciona los asientos</p>
       </div>
 
-      <!-- DESTINO -->
+      @if (paqueteSeleccionado) {
+        <div class="paquete-info">
+          <strong>Paquete seleccionado:</strong> {{ paqueteSeleccionado.titulo }}
+          <span>S/. {{ paqueteSeleccionado.presio | number:'1.0-2' }}</span>
+        </div>
+      }
+
       <div class="form-group">
-        <label><strong>Destino *</strong></label>
         <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
-          <option [ngValue]="null">Selecciona un destino</option>
+          <option [ngValue]="null">Destino para reservar</option>
           @for (d of destinos; track d.id) {
             <option [ngValue]="d">{{ d.title }}</option>
           }
@@ -34,39 +37,52 @@
       @if (destinoSeleccionado) {
         @if (autoSeleccionado) {
           <div class="vehiculo-info">
-            <strong>🚐 Vehículo:</strong> {{ autoSeleccionado.placa }} — {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}<br>
-            <strong>👨‍✈️ Conductor:</strong> {{ autoSeleccionado.conductor || 'No asignado' }}
+            <div><strong>Vehiculo:</strong> {{ autoSeleccionado.placa }} - {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</div>
+            <div><strong>Tipo:</strong> {{ autoSeleccionado.tipo }} · {{ autoSeleccionado.cantidadAsiento }} asientos</div>
+            <div><strong>Conductor:</strong> {{ autoSeleccionado.conductor || 'No asignado' }}</div>
           </div>
         } @else {
-          <p class="warning">⚠️ Este destino aún no tiene vehículo asignado</p>
+          <p class="warning">Este destino aun no tiene vehiculo asignado</p>
         }
 
         <div class="seat-section">
-          <h3>Asientos Disponibles - {{ destinoSeleccionado.title }}</h3>
-          
-          <div class="bus-container">
+          <h3>Asientos disponibles - {{ destinoSeleccionado.title }}</h3>
+
+          <div class="bus-container" [class.minivan]="autoSeleccionado?.tipo === 'minivan' || autoSeleccionado?.modelo?.toLowerCase()?.includes('master')">
+            <div class="vehicle-label">
+              {{ autoSeleccionado?.marca }} {{ autoSeleccionado?.modelo }} {{ autoSeleccionado?.anioFabrica }}
+            </div>
+
             <div class="front-row">
-              <div class="conductor-box">🚍 Conductor</div>
+              <div class="conductor-box">Conductor</div>
               @if (copiloto) {
-                <div class="asiento copiloto"
-                     [class.ocupado]="copiloto.estado !== 'libre'"
-                     [class.seleccionado]="copiloto.estado === 'reservado'"
-                     (click)="toggleAsiento(copiloto)">
+                <div
+                  class="asiento copiloto"
+                  [class.ocupado]="copiloto.estado !== 'libre'"
+                  [class.seleccionado]="copiloto.estado === 'reservado'"
+                  (click)="toggleAsiento(copiloto)"
+                >
                   {{ copiloto.numeroAsiento }}
                 </div>
               }
             </div>
 
             <div class="asientos-principales">
-              @for (fila of asientosFilas; track $index) {
-                <div class="fila">
-                  @for (asiento of fila; track asiento.id) {
-                    <div class="asiento"
-                         [class.ocupado]="asiento.estado !== 'libre'"
-                         [class.seleccionado]="asiento.estado === 'reservado'"
-                         (click)="toggleAsiento(asiento)">
-                      {{ asiento.numeroAsiento }}
-                    </div>
+              @for (fila of asientosCroquis; track $index) {
+                <div class="fila croquis-row">
+                  @for (asiento of fila; track $index) {
+                    @if (asiento) {
+                      <div
+                        class="asiento"
+                        [class.ocupado]="asiento.estado !== 'libre'"
+                        [class.seleccionado]="asiento.estado === 'reservado'"
+                        (click)="toggleAsiento(asiento)"
+                      >
+                        {{ asiento.numeroAsiento }}
+                      </div>
+                    } @else {
+                      <div class="pasillo"></div>
+                    }
                   }
                 </div>
               }
@@ -80,22 +96,23 @@
           </div>
         </div>
 
-        <button class="btn-primary btn-large" 
-                [disabled]="asientosSeleccionados.length === 0 || cargando"
-                (click)="abrirFormularioPasajeros()">
-          Siguiente → {{ asientosSeleccionados.length }} asiento(s)
+        <button
+          class="btn-primary btn-large"
+          [disabled]="asientosSeleccionados.length === 0 || cargando"
+          (click)="abrirFormularioPasajeros()"
+        >
+          Siguiente - {{ asientosSeleccionados.length }} asiento(s)
         </button>
       }
     </div>
   }
 </div>
 
-<!-- MODAL PASAJEROS -->
 @if (mostrarModal) {
   <div class="modal-overlay">
     <div class="modal modal-form">
       <h2>Datos de Pasajeros ({{ asientosSeleccionados.length }})</h2>
-      
+
       @for (asiento of asientosSeleccionados; track asiento.id; let i = $index) {
         <div class="pasajero-form">
           <h4>Asiento {{ asiento.numeroAsiento }}</h4>
@@ -104,7 +121,7 @@
             <input [(ngModel)]="pasajeros[i].apellido" placeholder="Apellido *" />
             <input type="number" [(ngModel)]="pasajeros[i].dni" placeholder="DNI *" />
             <input type="email" [(ngModel)]="pasajeros[i].email" placeholder="Email *" />
-            <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Teléfono *" />
+            <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Telefono *" />
           </div>
         </div>
       }

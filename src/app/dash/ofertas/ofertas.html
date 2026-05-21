@@ -1,62 +1,118 @@
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="m-0 fw-bold text-primary">Ofertas y Promociones</h2>
-            <p class="text-muted small">Gestiona los descuentos activos para tus paquetes</p>
-        </div>
-        <button mat-raised-button color="primary">
-            <mat-icon>add</mat-icon> Crear Nueva Oferta
+<div class="offers-page">
+  <div class="page-header">
+    <div>
+      <h2>Ofertas y Promociones</h2>
+      <p>Gestiona descuentos activos para los paquetes turisticos.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="abrirNueva()">
+      <mat-icon>add</mat-icon>
+      Crear Oferta
+    </button>
+  </div>
+
+  @if (successMsg()) {
+    <div class="alert success">{{ successMsg() }}</div>
+  }
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+
+  @if (formVisible()) {
+    <section class="form-panel">
+      <h3>{{ editingId() ? 'Editar oferta' : 'Nueva oferta' }}</h3>
+      <div class="form-grid">
+        <label>
+          Titulo
+          <input type="text" [(ngModel)]="form.titulo" placeholder="Promo de temporada">
+        </label>
+        <label>
+          Paquete
+          <select [(ngModel)]="form.paqueteId">
+            <option value="">Seleccionar paquete</option>
+            @for (p of paquetes(); track p.id) {
+              <option [value]="p.id">{{ p.titulo }} - S/. {{ p.presio | number:'1.0-2' }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Descuento (%)
+          <input type="number" min="1" max="100" [(ngModel)]="form.descuento">
+        </label>
+        <label>
+          Inicio
+          <input type="date" [(ngModel)]="form.fechaInicio">
+        </label>
+        <label>
+          Fin
+          <input type="date" [(ngModel)]="form.fechaFin">
+        </label>
+        <label class="full">
+          Descripcion
+          <textarea rows="3" [(ngModel)]="form.descripcion"></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button mat-button type="button" (click)="cerrarFormulario()">Cancelar</button>
+        <button mat-raised-button color="primary" type="button" (click)="guardar()">
+          {{ editingId() ? 'Actualizar' : 'Crear' }}
         </button>
-    </div>
+      </div>
+    </section>
+  }
 
-    <div class="row g-4">
-        @for (o of ofertas(); track o.id) {
-        <div class="col-12 col-md-6 col-lg-4">
-            <mat-card class="oferta-card h-100 shadow-sm border-0">
-                <mat-card-header>
-                    <div mat-card-avatar class="discount-icon-bg">
-                        <mat-icon color="primary">local_offer</mat-icon>
-                    </div>
-                    <mat-card-title class="fw-bold">{{ o.titulo }}</mat-card-title>
-                    <mat-card-subtitle>Cód. Paquete: {{ o.paqueteId }}</mat-card-subtitle>
-                </mat-card-header>
+  <div class="offers-grid">
+    @for (o of ofertasDecoradas(); track o.id) {
+      <mat-card class="oferta-card">
+        <mat-card-header>
+          <div mat-card-avatar class="discount-icon-bg">
+            <mat-icon color="primary">local_offer</mat-icon>
+          </div>
+          <mat-card-title>{{ o.titulo }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ o.paquete?.titulo || 'Paquete no encontrado' }}
+          </mat-card-subtitle>
+        </mat-card-header>
 
-                <mat-card-content class="mt-3">
-                    <p class="text-secondary small">{{ o.descripcion }}</p>
+        <mat-card-content>
+          <p class="description">{{ o.descripcion || 'Sin descripcion registrada.' }}</p>
 
-                    <div class="status-box d-flex align-items-center justify-content-between p-2 rounded mb-3">
-                        <span class="fw-bold text-success fs-4">{{ o.descuento }}% OFF</span>
-                        <mat-slide-toggle [checked]="o.estado" color="primary" (change)="toggleEstado(o)">
-                            {{ o.estado ? 'Activa' : 'Pausada' }}
-                        </mat-slide-toggle>
-                    </div>
+          <div class="status-box">
+            <span>{{ o.descuento }}% OFF</span>
+            <mat-slide-toggle [checked]="o.estado" color="primary" (change)="toggleEstado(o)">
+              {{ o.estado ? 'Activa' : 'Pausada' }}
+            </mat-slide-toggle>
+          </div>
 
-                    <div class="vigencia-container p-2 bg-light rounded">
-                        <div class="small mb-1">
-                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">calendar_today</mat-icon>
-                            <b> Inicio:</b> {{ o.fechaInicio | date:'dd/MM/yyyy' }}
-                        </div>
-                        <div class="small">
-                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">event_busy</mat-icon>
-                            <b> Fin:</b> {{ o.fechaFin | date:'dd/MM/yyyy' }}
-                        </div>
-                    </div>
-                </mat-card-content>
+          <div class="vigencia-container">
+            <div>
+              <mat-icon>calendar_today</mat-icon>
+              <span>Inicio: {{ o.fechaInicio | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div>
+              <mat-icon>event_busy</mat-icon>
+              <span>Fin: {{ o.fechaFin | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
 
-                <mat-divider></mat-divider>
+        <mat-divider></mat-divider>
 
-                <mat-card-actions align="end">
-                    <button mat-button color="primary"><mat-icon>edit</mat-icon> Editar</button>
-                    <button mat-icon-button color="warn" (click)="eliminarOferta(o.id)">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </mat-card-actions>
-            </mat-card>
-        </div>
-        } @empty {
-        <div class="col-12 text-center py-5">
-            <p class="text-muted">No se encontraron ofertas disponibles.</p>
-        </div>
-        }
-    </div>
+        <mat-card-actions align="end">
+          <button mat-button color="primary" (click)="abrirEditar(o)">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarOferta(o)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @empty {
+      <div class="empty-state">
+        <mat-icon>local_offer</mat-icon>
+        <p>No se encontraron ofertas disponibles.</p>
+      </div>
+    }
+  </div>
 </div>

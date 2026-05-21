@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
     ).subscribe((e: any) => {
       const url: string = e.urlAfterRedirects ?? e.url;
       this.isLoginRoute = url.includes('/login');
-      this.isAdminRoute = url.includes('/users');
+      this.isAdminRoute = url.startsWith('/dash');
       this.menuOpen = false;
     });
   }

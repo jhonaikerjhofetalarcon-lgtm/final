@@ -9,6 +9,8 @@
     <div class="nav-menu" [class.open]="menuOpen">
       <a routerLink="/home"      routerLinkActive="activo" (click)="menuOpen=false">Inicio</a>
       <a routerLink="/destinos"  routerLinkActive="activo" (click)="menuOpen=false">Destinos</a>
+      <a routerLink="/paquetes"  routerLinkActive="activo" (click)="menuOpen=false">Paquetes</a>
+      <a routerLink="/nosotros"  routerLinkActive="activo" (click)="menuOpen=false">Nosotros</a>
       <a routerLink="/reservas"  routerLinkActive="activo" class="nav-cta" (click)="menuOpen=false">Reservar ahora</a>
       <a routerLink="/contacto"  routerLinkActive="activo" (click)="menuOpen=false">Contacto</a>
       @if (isLoggedIn) {

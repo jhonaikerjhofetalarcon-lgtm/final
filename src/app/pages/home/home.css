@@ -13,6 +13,8 @@
   height: 100vh;
   min-height: 580px;
   overflow: hidden;
+  display: grid;
+  place-items: center;
 }
 
 .hero-img {
@@ -32,7 +34,9 @@
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, rgba(0,0,0,0.65), rgba(20,20,20,0.75));
+  background:
+    radial-gradient(circle at 50% 45%, rgba(192,57,43,.28), transparent 34%),
+    linear-gradient(160deg, rgba(0,0,0,0.68), rgba(20,20,20,0.78));
   z-index: 1;
 }
 
@@ -42,6 +46,7 @@
   text-align: center;
   color: white;
   padding: 0 20px;
+  max-width: 860px;
 }
 
 .hero-badge {
@@ -53,6 +58,7 @@
   font-size: 0.9rem;
   letter-spacing: 2px;
   margin-bottom: 16px;
+  backdrop-filter: blur(8px);
 }
 
 .hero-title {
@@ -62,6 +68,7 @@
   line-height: 1.05;
   margin-bottom: 12px;
   text-shadow: 0 4px 25px rgba(0,0,0,0.6);
+  letter-spacing: 0;
 }
 
 .hero-sub {
@@ -79,6 +86,7 @@
   text-decoration: none;
   display: inline-block;
   transition: all 0.3s;
+  box-shadow: 0 16px 36px rgba(192,57,43,.28);
 }
 
 .hero-cta:hover {
@@ -91,6 +99,7 @@
   background: #fff;
   border-bottom: 1px solid #eee;
   padding: 24px 40px;
+  box-shadow: 0 10px 30px rgba(15,23,42,.05);
 }
 
 .filters-container {
@@ -152,10 +161,11 @@
 
 .card-destino {
   background: white;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
   transition: all 0.4s ease;
+  border: 1px solid #edf1f5;
 }
 
 .card-destino:hover {
@@ -175,7 +185,7 @@
 }
 
 .card-info {
-  padding: 20px;
+  padding: 22px;
 }
 
 .card-tag {
@@ -217,6 +227,13 @@
   color: #c0392b;
   font-weight: 500;
   text-decoration: none;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* ==================== STATS ==================== */

@@ -19,6 +19,11 @@ public class DestinoController {
     return service.list();
   }
 
+  @GetMapping("/{id}")
+  public DestinoResponse get(@PathVariable String id) {
+    return service.get(id);
+  }
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public DestinoResponse create(@RequestBody DestinoCreateRequest req) {

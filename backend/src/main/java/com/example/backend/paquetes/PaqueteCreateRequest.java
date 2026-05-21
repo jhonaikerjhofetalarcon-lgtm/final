@@ -8,5 +8,6 @@ public record PaqueteCreateRequest(
   String descripcion,
   @NotNull Long presio,
   String id_paquete,
-  String imagenes
+  String imagenes,
+  Boolean estado
 ) {}

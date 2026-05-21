@@ -16,6 +16,10 @@
       <p class="slide-label">{{ slide.label }}</p>
       <h2 class="slide-title" [innerHTML]="slide.title"></h2>
       <p class="slide-desc">{{ slide.desc }}</p>
+      <div class="slide-actions">
+        <a [routerLink]="['/destinos', slide.id]" class="btn-detail">Ver detalles</a>
+        <a [routerLink]="['/reservas']" [queryParams]="{ destinoId: slide.id }" class="btn-reserve">Reservar</a>
+      </div>
     </div>
   </div>
 }

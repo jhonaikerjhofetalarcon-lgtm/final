@@ -1,0 +1,39 @@
+@if (cargando()) {
+  <div class="state">Cargando paquete...</div>
+} @else if (error()) {
+  <div class="state error">{{ error() }}</div>
+} @else if (paquete(); as p) {
+  <main class="detalle-page">
+    <section class="detalle-hero" [style.background-image]="'linear-gradient(120deg, rgba(0,0,0,.72), rgba(0,0,0,.25)), url(' + (p.imagenes || 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg') + ')'">
+      <div class="hero-content">
+        <span>{{ p.id_paquete || 'Paquete turistico' }}</span>
+        <h1>{{ p.titulo }}</h1>
+        <p>{{ p.descripcion }}</p>
+        <div class="price-line">
+          @if (oferta()) {
+            <small>S/. {{ p.presio | number:'1.0-2' }}</small>
+            <b>-{{ oferta()?.descuento }}%</b>
+          }
+          <strong>S/. {{ precioFinal() | number:'1.0-2' }}</strong>
+        </div>
+        <div class="actions">
+          <a [routerLink]="['/reservas']" [queryParams]="{ paqueteId: p.id }" class="btn-primary">Reservar este paquete</a>
+          <a routerLink="/paquetes" class="btn-secondary">Volver a paquetes</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="detalle-info">
+      <div>
+        <h2>Detalles del paquete</h2>
+        <p>{{ p.descripcion || 'Paquete turistico disponible para reservar.' }}</p>
+        <ul>
+          <li><strong>Codigo:</strong> {{ p.id_paquete || p.id }}</li>
+          <li><strong>Estado:</strong> {{ p.estado ? 'Disponible' : 'No disponible' }}</li>
+          <li><strong>Precio final:</strong> S/. {{ precioFinal() | number:'1.0-2' }}</li>
+        </ul>
+        <a [routerLink]="['/reservas']" [queryParams]="{ paqueteId: p.id }" class="btn-primary inline">Ir al formulario de reserva</a>
+      </div>
+    </section>
+  </main>
+}

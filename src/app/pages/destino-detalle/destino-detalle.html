@@ -1,0 +1,33 @@
+@if (cargando()) {
+  <div class="state">Cargando destino...</div>
+} @else if (error()) {
+  <div class="state error">{{ error() }}</div>
+} @else if (destino(); as d) {
+  <main class="detalle-page">
+    <section class="detalle-hero" [style.background-image]="'linear-gradient(120deg, rgba(0,0,0,.72), rgba(0,0,0,.25)), url(' + d.bg + ')'">
+      <div class="hero-content">
+        <span>{{ d.label }}</span>
+        <h1>{{ d.title }}</h1>
+        <p>{{ d.desc }}</p>
+        <div class="actions">
+          <a [routerLink]="['/reservas']" [queryParams]="{ destinoId: d.id }" class="btn-primary">Reservar este destino</a>
+          <a routerLink="/destinos" class="btn-secondary">Volver a destinos</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="detalle-info">
+      <img [src]="d.thumb || d.bg" [alt]="d.title">
+      <div>
+        <h2>Detalles del viaje</h2>
+        <p>{{ d.desc }}</p>
+        <ul>
+          <li><strong>Lugar:</strong> {{ d.name || d.title }}</li>
+          <li><strong>Codigo:</strong> {{ d.id }}</li>
+          <li><strong>Vehiculo asignado:</strong> {{ d.idAuto || 'Pendiente de asignar' }}</li>
+        </ul>
+        <a [routerLink]="['/reservas']" [queryParams]="{ destinoId: d.id }" class="btn-primary inline">Ir al formulario de reserva</a>
+      </div>
+    </section>
+  </main>
+}

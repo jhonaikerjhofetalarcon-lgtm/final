@@ -1,47 +1,120 @@
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="m-0">Gestión de Paquetes Turísticos</h2>
-        <button mat-raised-button color="primary">
-            <mat-icon>add</mat-icon> Nuevo Paquete
-        </button>
+<div class="packages-page">
+  <div class="page-header">
+    <div>
+      <h2>Gestion de Paquetes Turisticos</h2>
+      <p>Administra paquetes, precios, imagenes y disponibilidad desde el backend.</p>
     </div>
+    <div class="header-actions">
+      <div class="total-box">
+        <span>Total publicado</span>
+        <strong>S/. {{ totalValor() | number:'1.0-2' }}</strong>
+      </div>
+      <button mat-raised-button color="primary" (click)="abrirNuevo()">
+        <mat-icon>add</mat-icon>
+        Nuevo Paquete
+      </button>
+    </div>
+  </div>
 
-    <div class="row g-4">
-        @for (item of listaPaquetes(); track item.id) {
-        <div class="col-md-4 col-lg-3">
-            <mat-card class="package-card shadow-sm h-100">
-                <div class="position-relative">
-                    <img mat-card-image [src]="item.imagenes || ''" class="card-img">
-                    @if (item.oferta) {
-                    <span class="badge-discount">-{{ item.oferta.descuento }}%</span>
-                    }
-                </div>
+  @if (successMsg()) {
+    <div class="alert success">{{ successMsg() }}</div>
+  }
 
-                <mat-card-content class="pt-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h3 class="package-title">{{ item.titulo }}</h3>
-                        <mat-chip [color]="item.estado ? 'primary' : 'warn'" selected class="status-chip">
-                            {{ item.estado ? 'Activo' : 'Inactivo' }}
-                        </mat-chip>
-                    </div>
-                    <p class="package-desc">{{ item.descripcion }}</p>
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
 
-                    <div class="price-section mt-3">
-                        @if (item.oferta) {
-                        <span class="old-price">S/. {{ item.presio }}</span>
-                        <div class="current-price text-success">S/. {{ item.precioFinal | number:'1.0-0' }}</div>
-                        } @else {
-                        <div class="current-price">S/. {{ item.presio }}</div>
-                        }
-                    </div>
-                </mat-card-content>
-
-                <mat-card-actions align="end">
-                    <button mat-icon-button color="primary"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button color="warn"><mat-icon>delete</mat-icon></button>
-                </mat-card-actions>
-            </mat-card>
+  @if (formVisible()) {
+    <section class="form-panel">
+      <h3>{{ editingId() ? 'Editar paquete' : 'Agregar paquete' }}</h3>
+      <div class="form-grid">
+        <label>
+          Titulo
+          <input type="text" [(ngModel)]="form.titulo" placeholder="Cusco Magico">
+        </label>
+        <label>
+          Codigo
+          <input type="text" [(ngModel)]="form.id_paquete" placeholder="PKG-001">
+        </label>
+        <label>
+          Precio (S/.)
+          <input type="number" min="0" [(ngModel)]="form.presio">
+        </label>
+        <label>
+          Imagen URL
+          <input type="url" [(ngModel)]="form.imagenes" placeholder="https://...">
+        </label>
+        <label class="full">
+          Descripcion
+          <textarea rows="3" [(ngModel)]="form.descripcion"></textarea>
+        </label>
+        <div class="toggle-line">
+          <mat-slide-toggle [(ngModel)]="form.estado" color="primary">Paquete activo</mat-slide-toggle>
         </div>
-        }
-    </div>
+      </div>
+      <div class="form-actions">
+        <button mat-button type="button" (click)="cerrarFormulario()">Cancelar</button>
+        <button mat-raised-button color="primary" type="button" (click)="guardar()">
+          {{ editingId() ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <div class="packages-grid">
+    @for (item of listaPaquetes(); track item.id) {
+      <mat-card class="package-card">
+        <div class="image-wrap">
+          @if (item.imagenes) {
+            <img mat-card-image [src]="item.imagenes" [alt]="item.titulo">
+          } @else {
+            <div class="image-empty"><mat-icon>image</mat-icon></div>
+          }
+          @if (item.oferta) {
+            <span class="badge-discount">-{{ item.oferta.descuento }}%</span>
+          }
+        </div>
+
+        <mat-card-content>
+          <div class="title-row">
+            <div>
+              <h3>{{ item.titulo }}</h3>
+              <small>{{ item.id_paquete || item.id }}</small>
+            </div>
+            <mat-chip [color]="item.estado ? 'primary' : 'warn'" selected>
+              {{ item.estado ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+
+          <p class="package-desc">{{ item.descripcion || 'Sin descripcion registrada.' }}</p>
+
+          <div class="price-section">
+            @if (item.oferta) {
+              <span class="old-price">S/. {{ item.presio | number:'1.0-2' }}</span>
+              <strong class="current-price">S/. {{ item.precioFinal | number:'1.0-2' }}</strong>
+            } @else {
+              <strong class="current-price">S/. {{ item.presio | number:'1.0-2' }}</strong>
+            }
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-icon-button color="primary" matTooltip="Editar" (click)="abrirEditar(item)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="accent" matTooltip="Activar o pausar" (click)="toggleEstado(item)">
+            <mat-icon>{{ item.estado ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminar(item)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @empty {
+      <div class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No hay paquetes registrados.</p>
+      </div>
+    }
+  </div>
 </div>

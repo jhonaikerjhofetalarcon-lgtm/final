@@ -19,10 +19,25 @@ public class PaqueteController {
     return service.getAll();
   }
 
+  @GetMapping("/{id}")
+  public PaqueteResponse obtener(@PathVariable String id) {
+    return service.getById(id);
+  }
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public PaqueteResponse crear(@RequestBody @Valid PaqueteCreateRequest req) {
     return service.create(req);
+  }
+
+  @PutMapping("/{id}")
+  public PaqueteResponse actualizar(@PathVariable String id, @RequestBody @Valid PaqueteCreateRequest req) {
+    return service.update(id, req);
+  }
+
+  @PatchMapping("/{id}/toggle")
+  public PaqueteResponse cambiarEstado(@PathVariable String id) {
+    return service.toggleEstado(id);
   }
 
   @DeleteMapping("/{id}")

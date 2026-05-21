@@ -1,0 +1,62 @@
+<main class="paquetes-page">
+  <section class="hero-paquetes">
+    <div class="hero-copy">
+      <span>G7 Travel</span>
+      <h1>Paquetes turisticos</h1>
+      <p>Explora los paquetes publicados desde el panel de administracion.</p>
+    </div>
+  </section>
+
+  <section class="paquetes-section">
+    <div class="section-header">
+      <div>
+        <h2>{{ paquetesPublicados().length }} paquetes disponibles</h2>
+        <p>Precios y ofertas sincronizados con el backend.</p>
+      </div>
+      <button type="button" class="btn-refresh" (click)="cargarDatos()">Actualizar</button>
+    </div>
+
+    @if (cargando()) {
+      <div class="state">Cargando paquetes...</div>
+    } @else if (error()) {
+      <div class="state error">{{ error() }}</div>
+    } @else {
+      <div class="grid-paquetes">
+        @for (p of paquetesPublicados(); track p.id) {
+          <article class="card-paquete">
+            <div class="image-wrap">
+              <img
+                [src]="p.imagenes || 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'"
+                [alt]="p.titulo"
+              >
+              @if (p.oferta) {
+                <span class="discount">-{{ p.oferta.descuento }}%</span>
+              }
+            </div>
+
+            <div class="card-info">
+              <span class="codigo">{{ p.id_paquete || 'PAQUETE' }}</span>
+              <h3>{{ p.titulo }}</h3>
+              <p>{{ p.descripcion || 'Paquete turistico disponible para reservar.' }}</p>
+
+              <div class="card-footer">
+                <div class="price">
+                  @if (p.oferta) {
+                    <small>S/. {{ p.presio | number:'1.0-2' }}</small>
+                  }
+                  <strong>S/. {{ p.precioFinal | number:'1.0-2' }}</strong>
+                </div>
+                <div class="card-actions">
+                  <a [routerLink]="['/paquetes', p.id]" class="btn-detalle">Detalles</a>
+                  <a [routerLink]="['/reservas']" [queryParams]="{ paqueteId: p.id }" class="btn-reserva">Reservar</a>
+                </div>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <div class="state">Aun no hay paquetes activos para mostrar.</div>
+        }
+      </div>
+    }
+  </section>
+</main>

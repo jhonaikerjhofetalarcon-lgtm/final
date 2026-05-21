@@ -101,6 +101,32 @@ body {
     max-width: 400px;
 }
 
+.slide-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+.btn-detail,
+.btn-reserve {
+    border-radius: 6px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-detail {
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    color: #fff;
+}
+
+.btn-reserve {
+    background: #c0392b;
+    color: #fff;
+}
+
 .slide-status {
     position: absolute;
     top: 40px;

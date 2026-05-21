@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { G7ApiService, DestinoDto } from '../../core/g7-api.service';
 
 interface Slide {
+  id: string;
   bg: string;
   thumb: string;
   label: string;
@@ -14,7 +16,7 @@ interface Slide {
 @Component({
   selector: 'app-destinos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './destinos.html',
   styleUrl: './destinos.css',
 })
@@ -57,6 +59,7 @@ export class Destinos implements OnInit, OnDestroy {
     const title =
       titlePlain.includes('<') ? titlePlain : titlePlain.replace(' ', '<br>');
     return {
+      id: d.id,
       bg: d.bg,
       thumb: d.thumb,
       label: d.label,

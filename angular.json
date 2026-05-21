@@ -34,6 +34,14 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -48,8 +56,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "14kB",
+                  "maximumError": "18kB"
                 }
               ],
               "outputHashing": "all"

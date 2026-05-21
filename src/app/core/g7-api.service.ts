@@ -33,6 +33,7 @@ export interface PaqueteCreatePayload {
   presio: number;
   id_paquete: string;
   imagenes: string;
+  estado?: boolean;
 }
 
 export interface OfertaCreatePayload {
@@ -274,6 +275,10 @@ getDestinos(): Observable<DestinoDto[]> {
     return this.http.get<DestinoDto[]>(`${this.base}/destinos`);
   }
 
+  getDestino(id: string): Observable<DestinoDto> {
+    return this.http.get<DestinoDto>(`${this.base}/destinos/${encodeURIComponent(id)}`);
+  }
+
   createDestino(body: DestinoCreatePayload): Observable<DestinoDto> {
     return this.http.post<DestinoDto>(`${this.base}/destinos`, body);
   }
@@ -396,8 +401,20 @@ getAutos(): Observable<AutoDto[]> {
     return this.http.get<PaqueteDto[]>(`${this.base}/paquetes`);
   }
 
+  getPaquete(id: string): Observable<PaqueteDto> {
+    return this.http.get<PaqueteDto>(`${this.base}/paquetes/${encodeURIComponent(id)}`);
+  }
+
   createPaquete(body: PaqueteCreatePayload): Observable<PaqueteDto> {
     return this.http.post<PaqueteDto>(`${this.base}/paquetes`, body);
+  }
+
+  updatePaquete(id: string, body: PaqueteCreatePayload): Observable<PaqueteDto> {
+    return this.http.put<PaqueteDto>(`${this.base}/paquetes/${encodeURIComponent(id)}`, body);
+  }
+
+  togglePaquete(id: string): Observable<PaqueteDto> {
+    return this.http.patch<PaqueteDto>(`${this.base}/paquetes/${encodeURIComponent(id)}/toggle`, {});
   }
 
   deletePaquete(id: string): Observable<void> {
@@ -415,6 +432,14 @@ getAutos(): Observable<AutoDto[]> {
 
   createOferta(body: OfertaCreatePayload): Observable<OfertaDto> {
     return this.http.post<OfertaDto>(`${this.base}/ofertas`, body);
+  }
+
+  updateOferta(id: string, body: OfertaCreatePayload): Observable<OfertaDto> {
+    return this.http.put<OfertaDto>(`${this.base}/ofertas/${encodeURIComponent(id)}`, body);
+  }
+
+  toggleOferta(id: string): Observable<OfertaDto> {
+    return this.http.patch<OfertaDto>(`${this.base}/ofertas/${encodeURIComponent(id)}/toggle`, {});
   }
 
   deleteOferta(id: string): Observable<void> {
