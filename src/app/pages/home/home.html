@@ -65,7 +65,7 @@
           <h3>{{ d.title }}</h3>
           <p class="card-desc">{{ d.desc }}</p>
           <div class="card-footer">
-            <span class="precio">Desde S/ 120</span>
+            <span class="precio">{{ precioDestino(d) }}</span>
             <span class="card-actions">
               <a [routerLink]="['/destinos', d.id]" class="btn-ver">Detalles</a>
               <a [routerLink]="['/reservas']" [queryParams]="{ destinoId: d.id }" class="btn-ver" (click)="seleccionarDestino(d)">Reservar</a>

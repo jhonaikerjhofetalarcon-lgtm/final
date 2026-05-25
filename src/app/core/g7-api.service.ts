@@ -144,7 +144,7 @@ export interface ReservaDto {
   fechaIda: string;
   fechaVuelta: string;
   dni: number;
-  clase: string;
+  idAsiento: string;
   notas: string;
   createdAt: string;
 }
@@ -158,7 +158,7 @@ export interface ReservaCreatePayload {
   fechaIda: string;
   fechaVuelta: string;
   dni: number;
-  clase: string;
+  idAsiento: string;
   notas: string;
 }
 
@@ -392,6 +392,10 @@ getAutos(): Observable<AutoDto[]> {
     return this.http.patch(`${this.base}/asientos/${encodeURIComponent(id)}/liberar`, {});
   }
 
+  reservarAsiento(id: string, idReserva: string): Observable<AsientoDto> {
+    return this.http.patch<AsientoDto>(`${this.base}/asientos/${encodeURIComponent(id)}/reservar`, { idReserva });
+  }
+
   deleteAsiento(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/asientos/${encodeURIComponent(id)}`);
   }
@@ -451,6 +455,9 @@ getAutos(): Observable<AutoDto[]> {
 }
 
 
+  enviarConfirmacionReserva(body: any): Observable<any> {
+    return this.http.post(`${this.base}/email/confirmacion-reserva`, body);
+  }
 
 
 

@@ -6,7 +6,7 @@
     <div class="status-line"></div>
   </div>
 
-@for (slide of slides; track slide.bg; let i = $index) {
+@for (slide of slides; track slide.id; let i = $index) {
   <div
     class="slide"
     [class.active]="i === currentIndex"
@@ -36,7 +36,7 @@
   </button>
 
 <div class="dots">
-  @for (slide of slides; track slide.bg; let i = $index) {
+  @for (slide of slides; track slide.id; let i = $index) {
     <div
       class="dot"
       [class.active]="i === currentIndex"
@@ -46,7 +46,7 @@
 </div>
 
 <div class="thumbnails">
-  @for (slide of slides; track slide.bg; let i = $index) {
+  @for (slide of slides; track slide.id; let i = $index) {
     <div
       class="thumb"
       [class.active]="i === currentIndex"

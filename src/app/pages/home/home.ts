@@ -63,6 +63,12 @@ export class Home implements OnInit {
     localStorage.setItem('destinoSeleccionado', JSON.stringify(destino));
   }
 
+  precioDestino(destino: DestinoDto): string {
+    const texto = `${destino.name || ''} ${destino.desc || ''}`;
+    const match = texto.match(/S\/\.?\s*(\d+(?:\.\d{1,2})?)/i);
+    return match ? `Desde S/ ${match[1]}` : 'Consultar precio';
+  }
+
   private getDestinosRespaldo(): DestinoDto[] {
     return [ /* tus destinos de respaldo */ ];
   }

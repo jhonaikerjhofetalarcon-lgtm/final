@@ -26,6 +26,15 @@
       }
 
       <div class="form-group">
+        <input
+          class="destino-select"
+          type="date"
+          [(ngModel)]="fechaSalida"
+          aria-label="Fecha de salida"
+        />
+      </div>
+
+      <div class="form-group">
         <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
           <option [ngValue]="null">Destino para reservar</option>
           @for (d of destinos; track d.id) {
@@ -91,7 +100,6 @@
 
           <div class="leyenda">
             <span class="caja libre"></span> Libre
-            <span class="caja ocupado"></span> Ocupado
             <span class="caja seleccionado"></span> Seleccionado
           </div>
         </div>

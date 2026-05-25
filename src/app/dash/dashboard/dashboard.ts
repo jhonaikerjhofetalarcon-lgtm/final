@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router'; // Añade RouterModule para que funcione el nav
 import { G7ApiService, PaqueteDto, OfertaDto } from '../../core/g7-api.service';
@@ -17,7 +17,6 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [
     CommonModule, 
     FormsModule, 
-    DatePipe, 
     DecimalPipe,
     RouterModule,
     MatToolbarModule,

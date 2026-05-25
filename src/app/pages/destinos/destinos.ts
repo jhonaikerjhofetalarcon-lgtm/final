@@ -25,12 +25,19 @@ export class Destinos implements OnInit, OnDestroy {
   private autoTimer: ReturnType<typeof setInterval> | undefined;
 
   slides: Slide[] = [];
-
   cargando = true;
   error: string | null = null;
 
   private readonly fallback: Slide[] = [
-
+    {
+      id: '1',
+      bg: 'https://images.pexels.com/photos/259967/pexels-photo-259967.jpeg',
+      thumb: '',
+      label: 'Cusco',
+      title: 'Machu Picchu',
+      desc: 'La maravilla del mundo y símbolo del Perú',
+      name: 'machu-picchu'
+    }
   ];
 
   constructor(private readonly api: G7ApiService) {}
@@ -55,17 +62,14 @@ export class Destinos implements OnInit, OnDestroy {
   }
 
   private mapDestino(d: DestinoDto): Slide {
-    const titlePlain = d.title ?? '';
-    const title =
-      titlePlain.includes('<') ? titlePlain : titlePlain.replace(' ', '<br>');
     return {
       id: d.id,
-      bg: d.bg,
-      thumb: d.thumb,
-      label: d.label,
-      title,
-      desc: d.desc,
-      name: d.name,
+      bg: d.bg || '',
+      thumb: d.thumb || '',
+      label: d.label || '',
+      title: d.title || '',
+      desc: d.desc || '',
+      name: d.name || '',
     };
   }
 
