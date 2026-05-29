@@ -1,6 +1,8 @@
 package com.example.backend.destinos;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DestinoEntity {
 
@@ -12,7 +14,7 @@ public class DestinoEntity {
   @NotBlank private String name;
   @NotBlank private String bg;
   private String thumb;
-  private String idAuto;   // ← Vehículo asignado
+  private List<String> idAutos = new ArrayList<>();   // ← Cambiado a lista
 
   // Getters y Setters
   public String getId() { return id; }
@@ -36,6 +38,8 @@ public class DestinoEntity {
   public String getThumb() { return thumb; }
   public void setThumb(String thumb) { this.thumb = thumb; }
 
-  public String getIdAuto() { return idAuto; }
-  public void setIdAuto(String idAuto) { this.idAuto = idAuto; }
+  public List<String> getIdAutos() { return idAutos; }
+  public void setIdAutos(List<String> idAutos) {
+    this.idAutos = idAutos != null ? idAutos : new ArrayList<>();
+  }
 }

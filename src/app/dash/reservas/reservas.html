@@ -1,305 +1,194 @@
 <section class="section-content">
 
-    <div class="toolbar">
-        <div class="search-wrap">
-            <span class="si">🔍</span>
-            <input class="search-input" type="text" [(ngModel)]="busqueda" placeholder="Buscar reserva...">
-        </div>
-        <button class="btn-primary" (click)="abrirFormularioReserva()">+ Nueva reserva</button>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="si">🔍</span>
+      <input class="search-input" type="text" [(ngModel)]="busqueda" placeholder="Buscar por cliente, destino o DNI...">
+    </div>
+    <button class="btn-primary" (click)="abrirFormularioReserva()">
+      <span>+</span> Nueva Reserva
+    </button>
+  </div>
+
+  @if (formVisible) {
+  <div class="admin-reserva-card">
+    <div class="admin-form-head">
+      <h3>📋 Nueva Reserva con Pago</h3>
+      <button class="btn-cancel-pay" (click)="cerrarFormularioReserva()" [disabled]="guardandoReserva">✕ Cerrar</button>
     </div>
 
-    @if (formVisible) {
-    <div class="admin-reserva-card">
-        <div class="admin-form-head">
-            <div>
-                <h3>Nueva reserva con pago</h3>
-                <p>Registra la reserva desde el panel y confirma el pago en el mismo flujo.</p>
-            </div>
-            <button class="btn-cancel-pay" (click)="cerrarFormularioReserva()" [disabled]="guardandoReserva">Cerrar</button>
-        </div>
+    <div class="admin-reserva-grid">
 
-        <div class="admin-reserva-grid">
-            <div class="form-section-title">Cliente</div>
-            <label>
-                Nombre
-                <input type="text" [(ngModel)]="reservaForm.nombre" placeholder="Nombre">
-            </label>
-            <label>
-                Apellido
-                <input type="text" [(ngModel)]="reservaForm.apellido" placeholder="Apellido">
-            </label>
-            <label>
-                Email
-                <input type="email" [(ngModel)]="reservaForm.email" placeholder="correo@ejemplo.com">
-            </label>
-            <label>
-                Teléfono
-                <input type="tel" [(ngModel)]="reservaForm.telefono" placeholder="999999999">
-            </label>
-            <label>
-                DNI
-                <input type="number" [(ngModel)]="reservaForm.dni" placeholder="DNI">
-            </label>
+      <div class="form-section-title">👤 Datos del Cliente</div>
+      <label>Nombre * <input type="text" [(ngModel)]="reservaForm.nombre" placeholder="Nombre"></label>
+      <label>Apellido * <input type="text" [(ngModel)]="reservaForm.apellido" placeholder="Apellido"></label>
+      <label>Email * <input type="email" [(ngModel)]="reservaForm.email" placeholder="correo@ejemplo.com"></label>
+      <label>Teléfono * <input type="tel" [(ngModel)]="reservaForm.telefono" placeholder="999 999 999"></label>
+      <label>Origen * <input type="text" [(ngModel)]="reservaForm.origen" placeholder="Ciudad o terminal de origen"></label>
+      <label>DNI <input type="number" [(ngModel)]="reservaForm.dni" placeholder="DNI"></label>
 
-            <div class="form-section-title">Reserva</div>
-            <label>
-                Destino
-                <select [(ngModel)]="reservaForm.destino" (ngModelChange)="onDestinoReservaChange()">
-                    <option value="">Selecciona destino</option>
-                    @for (d of destinos; track d.id) {
-                    <option [value]="d.title">{{ d.title }}</option>
-                    }
-                </select>
-            </label>
-            <label>
-                Fecha ida
-                <input type="date" [(ngModel)]="reservaForm.fechaIda">
-            </label>
-            <label>
-                Fecha vuelta
-                <input type="date" [(ngModel)]="reservaForm.fechaVuelta">
-            </label>
-            <label>
-                Vehículo
-                <select [(ngModel)]="reservaForm.idAuto" (ngModelChange)="onAutoReservaChange()">
-                    <option value="">Selecciona vehículo</option>
-                    @for (a of autos; track a.id) {
-                    <option [value]="a.id">{{ a.placa }} - {{ a.marca }} {{ a.modelo }} - {{ a.conductor || 'Sin conductor' }}</option>
-                    }
-                </select>
-            </label>
-            <label class="full-field">
-                Notas
-                <textarea rows="2" [(ngModel)]="reservaForm.notas" placeholder="Detalle adicional de la reserva"></textarea>
-            </label>
+      <div class="form-section-title">🗺️ Datos del Viaje</div>
+      <label>
+        Destino *
+        <select [(ngModel)]="reservaForm.destino" (ngModelChange)="onDestinoReservaChange()">
+          <option value="">Selecciona un destino</option>
+          @for (d of destinos; track d.id) {
+          <option [value]="d.title">{{ d.title }}</option>
+          }
+        </select>
+      </label>
 
-            @if (autoSeleccionadoAdmin(); as auto) {
-            <div class="vehicle-summary">
-                <div><strong>Vehículo:</strong> {{ auto.placa }} - {{ auto.marca }} {{ auto.modelo }}</div>
-                <div><strong>Tipo:</strong> {{ auto.tipo }} · {{ auto.cantidadAsiento }} asientos</div>
-                <div><strong>Conductor:</strong> {{ auto.conductor || 'Sin conductor asignado' }}</div>
+      <label>Fecha Ida * <input type="date" [(ngModel)]="reservaForm.fechaIda"></label>
+      <label>Fecha Vuelta <input type="date" [(ngModel)]="reservaForm.fechaVuelta"></label>
+
+      <label>
+        Vehículo *
+        <select [(ngModel)]="reservaForm.idAutos[0]" (ngModelChange)="onAutoReservaChange()">
+          <option value="">Selecciona vehículo</option>
+          @for (a of autos; track a.id) {
+          <option [value]="a.id">
+            {{ a.placa }} — {{ a.marca }} {{ a.modelo }} ({{ a.cantidadAsiento }} asientos)
+          </option>
+          }
+        </select>
+      </label>
+
+      @if (autoSeleccionadoAdmin(); as auto) {
+      <div class="vehicle-summary">
+        <strong>{{ auto.marca }} {{ auto.modelo }}</strong> • {{ auto.placa }}<br>
+        <small>{{ auto.tipo }} • {{ auto.cantidadAsiento }} asientos • Conductor: {{ auto.conductor || 'Sin asignar' }}</small>
+      </div>
+      }
+
+      <div class="seat-map-admin">
+        <div class="seat-map-title">🪑 Selecciona Asiento</div>
+
+        @if (!reservaForm.idAutos?.length) {
+        <p class="info-text">Selecciona un vehículo para ver los asientos.</p>
+        } @else {
+        <div class="vehicle-map-admin">
+          <div class="front-row-admin">
+            <div class="driver-admin">Conductor</div>
+            @if (copilotoAdmin(); as copiloto) {
+            <button type="button" class="seat-admin"
+                    [class.selected]="reservaForm.idAsiento === copiloto.id"
+                    [class.busy]="!asientoDisponibleParaFecha(copiloto)"
+                    (click)="seleccionarAsientoAdmin(copiloto)"
+                    [disabled]="!asientoDisponibleParaFecha(copiloto)">
+              {{ copiloto.numeroAsiento }}
+            </button>
+            }
+          </div>
+
+          <div class="seat-rows-admin">
+            @for (fila of asientosCroquisAdmin(); track $index) {
+            <div class="seat-row-admin">
+              @for (a of fila; track $index) {
+              @if (a) {
+              <button type="button" class="seat-admin"
+                      [class.selected]="reservaForm.idAsiento === a.id"
+                      [class.busy]="!asientoDisponibleParaFecha(a)"
+                      (click)="seleccionarAsientoAdmin(a)"
+                      [disabled]="!asientoDisponibleParaFecha(a)">
+                {{ a.numeroAsiento }}
+              </button>
+              } @else {
+              <div class="aisle-admin"></div>
+              }
+              }
             </div>
             }
-
-            <div class="seat-map-admin">
-                <div class="seat-map-title">
-                    Croquis de asientos
-                    @if (reservaForm.idAsiento) {
-                    <span>Asiento seleccionado: {{ asientoSeleccionadoAdmin()?.numeroAsiento }}</span>
-                    }
-                </div>
-                @if (!reservaForm.idAuto) {
-                <p>Selecciona un vehículo para ver su croquis.</p>
-                } @else {
-                @if (asientosCroquisAdmin().length > 0) {
-                <div class="vehicle-map-admin">
-                    <div class="vehicle-label-admin">
-                        {{ autoSeleccionadoAdmin()?.marca }} {{ autoSeleccionadoAdmin()?.modelo }} {{ autoSeleccionadoAdmin()?.anioFabrica }}
-                    </div>
-
-                    <div class="front-row-admin">
-                        <div class="driver-admin">Conductor</div>
-                        @if (copilotoAdmin(); as copiloto) {
-                        <button
-                            type="button"
-                            class="seat-admin copiloto-admin"
-                            [class.selected]="reservaForm.idAsiento === copiloto.id"
-                            [class.busy]="!asientoDisponibleParaFecha(copiloto)"
-                            (click)="seleccionarAsientoAdmin(copiloto)"
-                            [disabled]="!asientoDisponibleParaFecha(copiloto)">
-                            {{ copiloto.numeroAsiento }}
-                        </button>
-                        }
-                    </div>
-
-                    <div class="seat-rows-admin">
-                        @for (fila of asientosCroquisAdmin(); track $index) {
-                        <div class="seat-row-admin">
-                            @for (a of fila; track $index) {
-                            @if (a) {
-                            <button
-                                type="button"
-                                class="seat-admin"
-                                [class.selected]="reservaForm.idAsiento === a.id"
-                                [class.busy]="!asientoDisponibleParaFecha(a)"
-                                (click)="seleccionarAsientoAdmin(a)"
-                                [disabled]="!asientoDisponibleParaFecha(a)"
-                                [title]="'Asiento ' + a.numeroAsiento">
-                                {{ a.numeroAsiento }}
-                            </button>
-                            } @else {
-                            <div class="aisle-admin"></div>
-                            }
-                            }
-                        </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="seat-legend-admin">
-                    <span><i class="legend-free"></i> Libre</span>
-                    <span><i class="legend-selected"></i> Seleccionado</span>
-                </div>
-                } @else {
-                <p>No hay asientos cargados para este vehículo.</p>
-                }
-                }
-            </div>
-
-            <label>
-                Número de asiento
-                <span class="selected-seat-field">{{ asientoSeleccionadoAdmin()?.numeroAsiento || 'Selecciona en el croquis' }}</span>
-            </label>
-
-            <div class="form-section-title">Pago</div>
-            <label>
-                Monto
-                <input type="number" min="1" step="0.01" [(ngModel)]="reservaForm.monto" placeholder="S/ 0.00">
-            </label>
-            <label>
-                Método
-                <select [(ngModel)]="reservaForm.metodo">
-                    <option value="yape">Yape</option>
-                    <option value="transferencia bcp">Transferencia BCP</option>
-                    <option value="plin">Plin</option>
-                    <option value="efectivo">Efectivo</option>
-                </select>
-            </label>
-            <label>
-                Estado
-                <span class="state-preview">completado</span>
-            </label>
-            <label class="full-field">
-                Referencia
-                <input type="text" [(ngModel)]="reservaForm.referencia" placeholder="Operacion, codigo o nota del pago">
-            </label>
+          </div>
         </div>
 
-        <div class="admin-form-actions">
-            <button class="btn-cancel-pay" (click)="cerrarFormularioReserva()" [disabled]="guardandoReserva">Cancelar</button>
-            <button class="btn-save-pay" (click)="guardarReservaConPago()" [disabled]="guardandoReserva">
-                {{ guardandoReserva ? 'Guardando...' : 'Guardar reserva y pago' }}
-            </button>
+        <div class="seat-legend-admin">
+          <span><span class="legend-free"></span> Libre</span>
+          <span><span class="legend-selected"></span> Seleccionado</span>
+          <span><span class="legend-busy"></span> Ocupado</span>
         </div>
+        }
+      </div>
+
+      <label class="full-field">
+        Asiento Seleccionado: 
+        <strong>{{ asientoSeleccionadoAdmin()?.numeroAsiento || 'Ninguno seleccionado' }}</strong>
+      </label>
+
+      <div class="form-section-title">💰 Datos del Pago</div>
+      <label>Monto (S/.) * <input type="number" min="1" step="0.01" [(ngModel)]="reservaForm.monto" placeholder="0.00"></label>
+      <label>Método *
+        <select [(ngModel)]="reservaForm.metodo">
+          <option value="yape">Yape</option>
+          <option value="transferencia bcp">Transferencia BCP</option>
+          <option value="plin">Plin</option>
+          <option value="efectivo">Efectivo</option>
+        </select>
+      </label>
+      <label>Referencia *
+        <input type="text" [(ngModel)]="reservaForm.referencia" placeholder="Código de operación">
+      </label>
     </div>
-    }
 
-    <div class="table-card">
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Cliente</th>
-                        <th>Destino</th>
-                        <th>Fechas</th>
-                        <th>DNI</th>
-                        <th>Asiento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (r of filtrados(); track r.id; let i = $index) {
-                    <tr>
-                        <td class="td-n">{{ i+1 }}</td>
-                        <td>
-                            <strong>{{ r.nombre }} {{ r.apellido }}</strong><br>
-                            <small>{{ r.email }}</small>
-                        </td>
-                        <td>{{ r.destino }}</td>
-                        <td>
-                            <small>Ida: {{ r.fechaIda | date:'shortDate' }}</small><br>
-                            <small>Vuelta: {{ r.fechaVuelta | date:'shortDate' }}</small>
-                        </td>
-                        <td><strong>{{ r.dni || '-' }}</strong></td>
-                        <td><strong>{{ asientoNumeroReserva(r) }}</strong></td>
-                        <td class="td-act">
-                            @if (reservaPagada(r.id)) {
-                            <span class="paid-badge">Reserva pagada</span>
-                            } @else {
-                            <button
-                                class="btn-pay"
-                                (click)="confirmarPagoReserva(r)"
-                                [disabled]="procesandoPagoId === r.id"
-                                title="Confirmar pago de reserva">
-                                {{ procesandoPagoId === r.id ? 'Guardando...' : 'Registrar pago' }}
-                            </button>
-                            }
-                            <button class="btn-ico del" (click)="eliminar(r)" title="Eliminar">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                    @if (pagoFormReservaId === r.id) {
-                    <tr class="payment-form-row">
-                        <td colspan="7">
-                            <div class="payment-form">
-                                <div class="payment-title">Datos del pago</div>
-
-                                <div class="pay-field pay-index">
-                                    <label>#</label>
-                                    <span>{{ i + 1 }}</span>
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Reserva</label>
-                                    <span>{{ codigoReserva(r) }}</span>
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Monto</label>
-                                    <input type="number" min="1" step="0.01" [(ngModel)]="pagoForm.monto" placeholder="S/ 0.00">
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Método</label>
-                                    <select [(ngModel)]="pagoForm.metodo">
-                                        <option value="yape">Yape</option>
-                                        <option value="transferencia bcp">Transferencia BCP</option>
-                                        <option value="plin">Plin</option>
-                                        <option value="efectivo">Efectivo</option>
-                                    </select>
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Estado</label>
-                                    <span class="state-preview">{{ pagoForm.estado }}</span>
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Referencia</label>
-                                    <input type="text" [(ngModel)]="pagoForm.referencia" placeholder="Operacion, codigo o nota">
-                                </div>
-
-                                <div class="pay-field">
-                                    <label>Fecha Pago</label>
-                                    <input type="datetime-local" [(ngModel)]="pagoForm.fechaPago">
-                                </div>
-
-                                <div class="pay-actions">
-                                    <label>Acciones</label>
-                                    <div>
-                                        <button class="btn-save-pay" (click)="guardarPagoReserva(r)" [disabled]="procesandoPagoId === r.id">
-                                            {{ procesandoPagoId === r.id ? 'Guardando...' : 'Guardar pago' }}
-                                        </button>
-                                        <button class="btn-cancel-pay" (click)="cancelarFormularioPago()" [disabled]="procesandoPagoId === r.id">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    }
-                    }
-                    @if (filtrados().length === 0) {
-                    <tr>
-                        <td colspan="7" class="td-empty">No hay reservas registradas</td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+    <div class="admin-form-actions">
+      <button class="btn-cancel-pay" (click)="cerrarFormularioReserva()" [disabled]="guardandoReserva">Cancelar</button>
+      <button class="btn-save-pay" (click)="guardarReservaConPago()" [disabled]="guardandoReserva">
+        {{ guardandoReserva ? 'Guardando...' : '💾 Guardar Reserva y Pago' }}
+      </button>
     </div>
+  </div>
+  }
+
+  <div class="table-card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Destino</th>
+            <th>Fechas</th>
+            <th>Asiento</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of filtrados(); track r.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>
+              <strong>{{ r.nombre }} {{ r.apellido }}</strong><br>
+              <small>{{ r.email }}</small>
+            </td>
+            <td>{{ r.destino }}</td>
+            <td>
+              <small>Ida: {{ r.fechaIda | date:'dd/MM' }}</small><br>
+              <small>V: {{ r.fechaVuelta | date:'dd/MM' }}</small>
+            </td>
+            <td><strong>{{ asientoNumeroReserva(r) }}</strong></td>
+            <td>
+              @if (reservaPagada(r.id)) {
+              <span class="status-paid">✅ Pagado</span>
+              } @else {
+              <span class="status-pending">⏳ Pendiente</span>
+              }
+            </td>
+            <td>
+              <button class="btn-small" (click)="confirmarPagoReserva(r)" [disabled]="procesandoPagoId === r.id">
+                💰 Pago
+              </button>
+              <button class="btn-ico del" (click)="eliminar(r)">🗑️</button>
+            </td>
+          </tr>
+          }
+          @if (filtrados().length === 0) {
+          <tr>
+            <td colspan="7" class="td-empty">No se encontraron reservas</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </section>

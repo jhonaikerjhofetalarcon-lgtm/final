@@ -7,11 +7,9 @@ import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+
+import java.util.*;
+
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -65,7 +63,6 @@ public class DestinoRepository {
     get(col.document(id).delete());
   }
 
-  // ==================== Mapeo ====================
   private DestinoEntity toEntity(DocumentSnapshot d) {
     DestinoEntity e = new DestinoEntity();
     e.setId(d.getId());
@@ -75,7 +72,16 @@ public class DestinoRepository {
     e.setName(string(d, "name"));
     e.setBg(string(d, "bg"));
     e.setThumb(string(d, "thumb"));
-    e.setIdAuto(string(d, "idAuto"));
+
+    // Soporte para lista de autos
+    Object autosObj = d.get("idAutos");
+    if (autosObj instanceof List) {
+      e.setIdAutos(((List<?>) autosObj).stream()
+        .map(Object::toString)
+        .toList());
+    } else {
+      e.setIdAutos(new ArrayList<>());
+    }
     return e;
   }
 
@@ -88,8 +94,8 @@ public class DestinoRepository {
     map.put("bg", e.getBg());
     map.put("thumb", e.getThumb() != null ? e.getThumb() : "");
 
-    if (e.getIdAuto() != null && !e.getIdAuto().trim().isEmpty()) {
-      map.put("idAuto", e.getIdAuto());
+    if (e.getIdAutos() != null && !e.getIdAutos().isEmpty()) {
+      map.put("idAutos", e.getIdAutos());
     }
 
     return map;

@@ -21,8 +21,16 @@ public class UserEntity {
   @NotNull
   private UserRole rol;
 
-  private String passwordHash; // bcrypt hash, nunca se devuelve al frontend
+  private String passwordHash;
 
+  // ==================== CAMPOS PARA CONDUCTOR ====================
+  private String licencia;
+  private String tipoLicencia;
+  private String fechaVencimientoLicencia;
+  private Integer experienciaAnios;
+  private String tipoVehiculo;
+
+  // Getters y Setters
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
 
@@ -40,4 +48,20 @@ public class UserEntity {
 
   public String getPasswordHash() { return passwordHash; }
   public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+  // Campos Conductor
+  public String getLicencia() { return licencia; }
+  public void setLicencia(String licencia) { this.licencia = licencia; }
+
+  public String getTipoLicencia() { return tipoLicencia; }
+  public void setTipoLicencia(String tipoLicencia) { this.tipoLicencia = tipoLicencia; }
+
+  public String getFechaVencimientoLicencia() { return fechaVencimientoLicencia; }
+  public void setFechaVencimientoLicencia(String fechaVencimientoLicencia) { this.fechaVencimientoLicencia = fechaVencimientoLicencia; }
+
+  public Integer getExperienciaAnios() { return experienciaAnios; }
+  public void setExperienciaAnios(Integer experienciaAnios) { this.experienciaAnios = experienciaAnios; }
+
+  public String getTipoVehiculo() { return tipoVehiculo; }
+  public void setTipoVehiculo(String tipoVehiculo) { this.tipoVehiculo = tipoVehiculo; }
 }

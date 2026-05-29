@@ -18,13 +18,16 @@ public class ReservaEntity {
   private LocalDate fechaIda;
   private LocalDate fechaVuelta;
 
-  private int dni;                    // ← cambiado
-  private String idAsiento;           // ← nuevo
-
+  private int dni;
+  private String idAsiento;
   private String notas;
   private Instant createdAt;
 
-  // Getters y Setters actualizados
+  // NUEVO CAMPO
+  private String origen;
+
+  // ==================== GETTERS Y SETTERS ====================
+
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
 
@@ -60,4 +63,8 @@ public class ReservaEntity {
 
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+  // NUEVO
+  public String getOrigen() { return origen; }
+  public void setOrigen(String origen) { this.origen = origen; }
 }

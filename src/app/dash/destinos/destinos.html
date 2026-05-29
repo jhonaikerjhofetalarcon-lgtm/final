@@ -1,5 +1,4 @@
 <section class="section-content">
-
     <div class="toolbar">
         <div class="search-wrap">
             <span class="si">🔍</span>
@@ -20,16 +19,17 @@
             <div class="fg"><label>Imagen Background (URL)</label><input type="text" [(ngModel)]="fDestino.bg"></div>
             <div class="fg"><label>Imagen Thumb (URL)</label><input type="text" [(ngModel)]="fDestino.thumb"></div>
 
+            <!-- Selección múltiple de vehículos -->
             <div class="fg">
-                <label>Vehículo Asignado</label>
-                <select [(ngModel)]="fDestino.idAuto">
-                    <option value="">Sin vehículo asignado</option>
+                <label>Vehículos Asignados (máximo 4)</label>
+                <select [(ngModel)]="fDestino.idAutos" multiple class="multi-select" style="height: 120px;">
                     @for (a of autos; track a.id) {
                     <option [value]="a.id">
                         {{ a.placa }} — {{ a.marca }} {{ a.modelo }}
                     </option>
                     }
                 </select>
+                <small>Presiona <strong>Ctrl + Click</strong> para seleccionar varios vehículos</small>
             </div>
         </div>
         <div class="form-actions">
@@ -51,7 +51,7 @@
                 <span class="destino-name">🏷 {{ d.name }}</span>
 
                 <div class="destino-auto">
-                    <strong>Vehículo:</strong> {{ getAutoInfo(d.idAuto) }}
+                    <strong>Vehículos:</strong> {{ getAutoInfo(d.idAutos) }}
                 </div>
             </div>
             <div class="destino-actions">

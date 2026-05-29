@@ -34,7 +34,7 @@ public class DestinoService {
     e.setName(req.name());
     e.setBg(req.bg());
     e.setThumb(req.thumb() != null ? req.thumb() : "");
-    e.setIdAuto(req.idAuto());
+    e.setIdAutos(req.idAutos());           // ← Corregido
 
     return DestinoResponse.from(repo.save(e));
   }
@@ -48,7 +48,7 @@ public class DestinoService {
     e.setName(req.name());
     e.setBg(req.bg());
     if (req.thumb() != null) e.setThumb(req.thumb());
-    e.setIdAuto(req.idAuto());
+    e.setIdAutos(req.idAutos());           // ← Corregido
 
     return DestinoResponse.from(repo.save(e));
   }

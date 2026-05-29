@@ -1,145 +1,146 @@
 <div class="reservas-wrapper">
   @if (errorApi) {
-    <p class="api-error">{{ errorApi }}</p>
+  <p class="api-error">{{ errorApi }}</p>
   }
 
   @if (enviado) {
-    <div class="success-card">
-      <div class="success-icon">OK</div>
-      <h2>Reserva confirmada</h2>
-      <p>Se registraron {{ reservasConfirmadas }} asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
-      <button class="btn-primary" (click)="nuevaReserva()">Hacer otra reserva</button>
-    </div>
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>¡Reserva Confirmada!</h2>
+    <p>Se registraron <strong>{{ reservasConfirmadas }}</strong> asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
+    <button class="btn-primary" (click)="nuevaReserva()">Hacer otra reserva</button>
+  </div>
   }
 
   @if (!enviado) {
-    <div class="form-card">
-      <div class="form-header">
-        <h1>Reserva tu Viaje</h1>
-      </div>
-
-      @if (paqueteSeleccionado) {
-        <div class="paquete-info">
-          <strong>Paquete seleccionado:</strong> {{ paqueteSeleccionado.titulo }}
-          <span>S/. {{ paqueteSeleccionado.presio | number:'1.0-2' }}</span>
-        </div>
-      }
-
-      <div class="form-group">
-        <input
-          class="destino-select"
-          type="date"
-          [(ngModel)]="fechaSalida"
-          aria-label="Fecha de salida"
-        />
-      </div>
-
-      <div class="form-group">
-        <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
-          <option [ngValue]="null">Destino para reservar</option>
-          @for (d of destinos; track d.id) {
-            <option [ngValue]="d">{{ d.title }}</option>
-          }
-        </select>
-      </div>
-
-      @if (destinoSeleccionado) {
-        @if (autoSeleccionado) {
-          <div class="vehiculo-info">
-            <div><strong>Vehiculo:</strong> {{ autoSeleccionado.placa }} - {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</div>
-            <div><strong>Tipo:</strong> {{ autoSeleccionado.tipo }} · {{ autoSeleccionado.cantidadAsiento }} asientos</div>
-            <div><strong>Conductor:</strong> {{ autoSeleccionado.conductor || 'No asignado' }}</div>
-          </div>
-        } @else {
-          <p class="warning">Este destino aun no tiene vehiculo asignado</p>
-        }
-
-        <div class="seat-section">
-          <h3>Asientos disponibles - {{ destinoSeleccionado.title }}</h3>
-
-          <div class="bus-container" [class.minivan]="autoSeleccionado?.tipo === 'minivan' || autoSeleccionado?.modelo?.toLowerCase()?.includes('master')">
-            <div class="vehicle-label">
-              {{ autoSeleccionado?.marca }} {{ autoSeleccionado?.modelo }} {{ autoSeleccionado?.anioFabrica }}
-            </div>
-
-            <div class="front-row">
-              <div class="conductor-box">Conductor</div>
-              @if (copiloto) {
-                <div
-                  class="asiento copiloto"
-                  [class.ocupado]="copiloto.estado !== 'libre'"
-                  [class.seleccionado]="copiloto.estado === 'reservado'"
-                  (click)="toggleAsiento(copiloto)"
-                >
-                  {{ copiloto.numeroAsiento }}
-                </div>
-              }
-            </div>
-
-            <div class="asientos-principales">
-              @for (fila of asientosCroquis; track $index) {
-                <div class="fila croquis-row">
-                  @for (asiento of fila; track $index) {
-                    @if (asiento) {
-                      <div
-                        class="asiento"
-                        [class.ocupado]="asiento.estado !== 'libre'"
-                        [class.seleccionado]="asiento.estado === 'reservado'"
-                        (click)="toggleAsiento(asiento)"
-                      >
-                        {{ asiento.numeroAsiento }}
-                      </div>
-                    } @else {
-                      <div class="pasillo"></div>
-                    }
-                  }
-                </div>
-              }
-            </div>
-          </div>
-
-          <div class="leyenda">
-            <span class="caja libre"></span> Libre
-            <span class="caja seleccionado"></span> Seleccionado
-          </div>
-        </div>
-
-        <button
-          class="btn-primary btn-large"
-          [disabled]="asientosSeleccionados.length === 0 || cargando"
-          (click)="abrirFormularioPasajeros()"
-        >
-          Siguiente - {{ asientosSeleccionados.length }} asiento(s)
-        </button>
-      }
+  <div class="form-card">
+    <div class="form-header">
+      <h1>Reserva tu Viaje</h1>
     </div>
+
+    <!-- Fecha de salida -->
+    <div class="form-group">
+      <label>Fecha de Salida</label>
+      <input class="destino-select" type="date" [(ngModel)]="fechaSalida" />
+    </div>
+
+    <!-- Destino -->
+    <div class="form-group">
+      <label>Destino</label>
+      <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
+        <option [ngValue]="null">Selecciona un destino</option>
+        @for (d of destinos; track d.id) {
+        <option [ngValue]="d">{{ d.title }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Cantidad de personas -->
+    @if (destinoSeleccionado) {
+    <div class="form-group">
+      <label><strong>¿Cuántas personas van?</strong></label>
+      <input type="number" [(ngModel)]="numeroPersonas" (ngModelChange)="asignarVehiculoSegunPersonas()"
+        class="destino-select" min="1" max="15" placeholder="Ejemplo: 4" />
+    </div>
+    }
+
+    <!-- Vehículo -->
+    @if (destinoSeleccionado && autoSeleccionado) {
+    <div class="vehiculo-info">
+      <h3>Vehículo Asignado:</h3>
+      <div><strong>{{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</strong></div>
+      <div>Placa: {{ autoSeleccionado.placa }}</div>
+      <div>Tipo: {{ autoSeleccionado.tipo }} · {{ autoSeleccionado.cantidadAsiento }} asientos</div>
+      <div>Conductor: {{ autoSeleccionado.conductor || 'No asignado' }}</div>
+    </div>
+
+    <!-- Asientos -->
+    <div class="seat-section">
+      <h3>Asientos disponibles</h3>
+
+      <div class="bus-container" 
+        [class.minivan]="(autoSeleccionado.tipo?.toLowerCase() || '').includes('minivan') || 
+                        (autoSeleccionado.modelo?.toLowerCase() || '').includes('master')">
+
+        <div class="vehicle-label">
+          {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }} {{ autoSeleccionado.anioFabrica }}
+        </div>
+
+        <div class="front-row">
+          <div class="conductor-box">Conductor</div>
+          @if (copiloto) {
+          <div class="asiento copiloto" 
+            [class.ocupado]="copiloto.estado !== 'libre'"
+            [class.seleccionado]="copiloto.estado === 'reservado'" 
+            (click)="toggleAsiento(copiloto)">
+            {{ copiloto.numeroAsiento }}
+          </div>
+          }
+        </div>
+
+        <div class="asientos-principales">
+          @for (fila of asientosCroquis; track $index) {
+          <div class="fila croquis-row">
+            @for (asiento of fila; track $index) {
+            @if (asiento) {
+            <div class="asiento" 
+              [class.ocupado]="asiento.estado !== 'libre'"
+              [class.seleccionado]="asiento.estado === 'reservado'" 
+              (click)="toggleAsiento(asiento)">
+              {{ asiento.numeroAsiento }}
+            </div>
+            } @else {
+            <div class="pasillo"></div>
+            }
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="leyenda">
+        <span class="caja libre"></span> Libre
+        <span class="caja seleccionado"></span> Seleccionado
+        <span class="caja ocupado"></span> Ocupado
+      </div>
+    </div>
+
+    <button class="btn-primary btn-large"
+      [disabled]="asientosSeleccionados.length === 0 || cargando"
+      (click)="abrirFormularioPasajeros()">
+      Continuar con {{ asientosSeleccionados.length }} asiento(s)
+    </button>
+    }
+  </div>
   }
 </div>
 
+<!-- Modal Pasajeros -->
 @if (mostrarModal) {
-  <div class="modal-overlay">
-    <div class="modal modal-form">
-      <h2>Datos de Pasajeros ({{ asientosSeleccionados.length }})</h2>
+<div class="modal-overlay">
+  <div class="modal modal-form">
+    <h2>Datos de los Pasajeros ({{ asientosSeleccionados.length }})</h2>
 
-      @for (asiento of asientosSeleccionados; track asiento.id; let i = $index) {
-        <div class="pasajero-form">
-          <h4>Asiento {{ asiento.numeroAsiento }}</h4>
-          <div class="form-grid">
-            <input [(ngModel)]="pasajeros[i].nombre" placeholder="Nombre *" />
-            <input [(ngModel)]="pasajeros[i].apellido" placeholder="Apellido *" />
-            <input type="number" [(ngModel)]="pasajeros[i].dni" placeholder="DNI *" />
-            <input type="email" [(ngModel)]="pasajeros[i].email" placeholder="Email *" />
-            <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Telefono *" />
-          </div>
-        </div>
-      }
-
-      <div class="modal-buttons">
-        <button class="btn-secondary" (click)="cancelarModal()">Cancelar</button>
-        <button class="btn-primary" (click)="confirmarReservas()" [disabled]="cargando">
-          Confirmar Reserva
-        </button>
+    @for (asiento of asientosSeleccionados; track asiento.id; let i = $index) {
+    <div class="pasajero-form">
+      <h4>Asiento {{ asiento.numeroAsiento }}</h4>
+      <div class="form-grid">
+        <input [(ngModel)]="pasajeros[i].nombre" placeholder="Nombre *" required />
+        <input [(ngModel)]="pasajeros[i].apellido" placeholder="Apellido *" required />
+        <input type="number" [(ngModel)]="pasajeros[i].dni" placeholder="DNI *" required />
+        <input type="email" [(ngModel)]="pasajeros[i].email" placeholder="Email *" />
+        <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Teléfono *" />
+        <input [(ngModel)]="pasajeros[i].origen" placeholder="Lugar de Origen (Ciudad)" />
       </div>
     </div>
+    }
+
+    <div class="modal-buttons">
+      <button class="btn-secondary" (click)="cancelarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="confirmarReservas()" [disabled]="cargando">
+        Confirmar Reserva
+      </button>
+    </div>
   </div>
+</div>
 }

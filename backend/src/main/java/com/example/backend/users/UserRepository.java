@@ -59,8 +59,10 @@ public class UserRepository {
     get(col.document(id).delete());
   }
 
+  // Método que faltaba (usado en DataInitializer)
   public long count() {
-    return get(col.limit(1).get()).isEmpty() ? 0 : 1;
+    QuerySnapshot snap = get(col.limit(1).get());
+    return snap.isEmpty() ? 0 : snap.size();
   }
 
   public UserEntity getOrThrow(String id) {
@@ -73,26 +75,50 @@ public class UserRepository {
     e.setNombre(string(d, "nombre"));
     e.setEmail(string(d, "email"));
     e.setTelefono(string(d, "telefono"));
+
     String rol = string(d, "rol");
     e.setRol(UserRole.fromString(rol));
+
     e.setPasswordHash(string(d, "passwordHash"));
+
+    // Campos para Conductor
+    e.setLicencia(string(d, "licencia"));
+    e.setTipoLicencia(string(d, "tipoLicencia"));
+    e.setFechaVencimientoLicencia(string(d, "fechaVencimientoLicencia"));
+    e.setExperienciaAnios(integer(d, "experienciaAnios"));
+    e.setTipoVehiculo(string(d, "tipoVehiculo"));
+
     return e;
   }
 
   private Map<String, Object> toDoc(UserEntity e) {
     Map<String, Object> map = new HashMap<>();
-    map.put("nombre",     e.getNombre());
-    map.put("email",      e.getEmail());
+    map.put("nombre", e.getNombre());
+    map.put("email", e.getEmail());
     map.put("emailLower", e.getEmail().toLowerCase());
-    map.put("telefono",   e.getTelefono());
-    map.put("rol",        e.getRol().name());
+    map.put("telefono", e.getTelefono());
+    map.put("rol", e.getRol().name());
+
     if (e.getPasswordHash() != null)
       map.put("passwordHash", e.getPasswordHash());
+
+    // Campos para Conductor
+    if (e.getLicencia() != null) map.put("licencia", e.getLicencia());
+    if (e.getTipoLicencia() != null) map.put("tipoLicencia", e.getTipoLicencia());
+    if (e.getFechaVencimientoLicencia() != null) map.put("fechaVencimientoLicencia", e.getFechaVencimientoLicencia());
+    if (e.getExperienciaAnios() != null) map.put("experienciaAnios", e.getExperienciaAnios());
+    if (e.getTipoVehiculo() != null) map.put("tipoVehiculo", e.getTipoVehiculo());
+
     return map;
   }
 
   private String string(DocumentSnapshot d, String field) {
     Object v = d.get(field);
     return v == null ? "" : String.valueOf(v);
+  }
+
+  private Integer integer(DocumentSnapshot d, String field) {
+    Object v = d.get(field);
+    return v == null ? null : Integer.valueOf(v.toString());
   }
 }

@@ -6,7 +6,7 @@ public enum UserRole {
 
   public static UserRole fromString(String value) {
     if (value == null) return conductor;
-    String clean = value.replace("\"", "").trim();
+    String clean = value.replace("\"", "").trim().toUpperCase();
     try {
       return UserRole.valueOf(clean);
     } catch (IllegalArgumentException e) {

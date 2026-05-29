@@ -21,13 +21,14 @@ public class ReservaService {
 
   public ReservaResponse get(String id) {
     return ReservaResponse.from(
-        repo.findById(id).orElseThrow(() -> new NoSuchElementException("Reserva no encontrada")));
+      repo.findById(id).orElseThrow(() -> new NoSuchElementException("Reserva no encontrada")));
   }
 
   public ReservaResponse create(ReservaCreateRequest req) {
     if (req.fechaVuelta().isBefore(req.fechaIda())) {
       throw new IllegalArgumentException("La fecha de vuelta no puede ser anterior a la fecha de ida");
     }
+
     ReservaEntity e = new ReservaEntity();
     e.setId(UUID.randomUUID().toString());
     e.setNombre(req.nombre());
@@ -40,6 +41,7 @@ public class ReservaService {
     e.setDni(req.dni());
     e.setIdAsiento(req.idAsiento());
     e.setNotas(req.notas());
+    e.setOrigen(req.origen());           // ← NUEVO
     e.setCreatedAt(Instant.now());
 
     return ReservaResponse.from(repo.save(e));
@@ -50,4 +52,3 @@ public class ReservaService {
     repo.deleteById(id);
   }
 }
-

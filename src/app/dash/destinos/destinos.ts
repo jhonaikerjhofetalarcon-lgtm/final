@@ -65,10 +65,8 @@ export class Destinos implements OnInit {
       name: this.fDestino.name.trim().toLowerCase(),
       bg: this.fDestino.bg?.trim() || '',
       thumb: this.fDestino.thumb?.trim() || '',
-      idAuto: this.fDestino.idAuto || null
+      idAutos: this.fDestino.idAutos || []   // ← Cambiado a array
     };
-
-    console.log('Guardando payload completo:', payload);
 
     if (this.editingId) {
       this.api.updateDestino(this.editingId, payload).subscribe({
@@ -108,19 +106,19 @@ export class Destinos implements OnInit {
     });
   }
 
-getAutoInfo(idAuto?: string): string {
-  if (!idAuto || idAuto.trim() === '') {
-    return 'Sin vehículo asignado';
+  // ✅ Actualizado para múltiples vehículos
+  getAutoInfo(idAutos?: string[]): string {
+    if (!idAutos || idAutos.length === 0) {
+      return 'Sin vehículo asignado';
+    }
+    
+    const nombres = idAutos.map(id => {
+      const auto = this.autos.find(a => a.id === id);
+      return auto ? `${auto.placa} — ${auto.marca} ${auto.modelo}` : 'Desconocido';
+    });
+    
+    return nombres.join(', ');
   }
-  
-  const auto = this.autos.find(a => a.id === idAuto);
-  
-  if (auto) {
-    return `${auto.placa} — ${auto.marca} ${auto.modelo}`;
-  }
-  
-  return 'Vehículo no encontrado';
-}
 
   filtrados(): DestinoDto[] {
     const q = this.busqueda.toLowerCase().trim();
@@ -132,7 +130,7 @@ getAutoInfo(idAuto?: string): string {
   private flash(msg: string): void {
     this.successMsg = msg;
     setTimeout(() => (this.successMsg = null), 3000);
-  }
+  } 
 
   private empty() {
     return { 
@@ -142,7 +140,7 @@ getAutoInfo(idAuto?: string): string {
       name: '', 
       bg: '', 
       thumb: '', 
-      idAuto: '' 
+      idAutos: [] as string[] 
     };
   }
 }

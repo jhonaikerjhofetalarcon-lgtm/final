@@ -11,6 +11,7 @@ interface Pasajero {
   dni: number;
   email: string;
   telefono: string;
+  origen: string;           // ← NUEVO
 }
 
 type AsientoSlot = AsientoDto | null;
@@ -32,7 +33,6 @@ export class Reservas implements OnInit {
   autoSeleccionado: AutoDto | null = null;
 
   asientos: AsientoDto[] = [];
-  asientosFilas: AsientoDto[][] = [];
   asientosCroquis: AsientoSlot[][] = [];
   copiloto: AsientoDto | null = null;
 
@@ -45,6 +45,8 @@ export class Reservas implements OnInit {
   errorApi: string | null = null;
   reservasConfirmadas = 0;
   fechaSalida = '2026-06-15';
+
+  numeroPersonas: number = 0;
 
   ngOnInit() {
     this.cargarDestinos();
@@ -73,77 +75,100 @@ export class Reservas implements OnInit {
   private preseleccionarDestino() {
     if (!this.destinos.length) return;
     const destinoId = this.route.snapshot.queryParamMap.get('destinoId');
-    const local = this.obtenerDestinoLocal();
+    const destino = this.destinos.find(d => d.id === destinoId) || this.destinos[0];
 
-    const destino = this.destinos.find(d => d.id === destinoId) ||
-                   (local ? this.destinos.find(d => d.id === local.id) : null) ||
-                   this.destinos[0];
-
-    if (destino && this.destinoSeleccionado?.id !== destino.id) {
+    if (destino) {
       this.destinoSeleccionado = destino;
       this.onDestinoChange();
     }
   }
 
-  private obtenerDestinoLocal(): DestinoDto | null {
-    try {
-      const raw = localStorage.getItem('destinoSeleccionado');
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+  onDestinoChange() {
+    this.numeroPersonas = 0;
+    this.autoSeleccionado = null;
+    this.asientosSeleccionados = [];
+    this.asientosCroquis = [];
+    this.copiloto = null;
   }
 
-  async onDestinoChange() {
-    if (!this.destinoSeleccionado) return;
-    this.cargando = true;
-
-    try {
-      const autos = await firstValueFrom(this.api.getAutos()) || [];
-      this.autoSeleccionado = autos.find(a => a.id === this.destinoSeleccionado!.idAuto) || null;
-
-      const todosAsientos = await firstValueFrom(this.api.getAsientos()) || [];
-      const asientosBackend = todosAsientos.filter(a => a.idAuto === this.destinoSeleccionado!.idAuto);
-
-      this.asientos = this.completarAsientosVehiculo(asientosBackend, this.autoSeleccionado);
-
-      this.copiloto = this.asientos.find(a => 
-        a.numeroAsiento?.toUpperCase().includes('C') || ['1','01'].includes(a.numeroAsiento || '')
-      ) || null;
-
-      const restantes = this.asientos.filter(a => a.id !== this.copiloto?.id);
-      this.asientosFilas = [];
-      for (let i = 0; i < restantes.length; i += 4) {
-        this.asientosFilas.push(restantes.slice(i, i + 4));
-      }
-      this.asientosCroquis = this.crearCroquis(restantes, this.autoSeleccionado);
-
-    } catch (e) {
-      this.errorApi = 'Error al cargar asientos';
-    } finally {
-      this.cargando = false;
+  asignarVehiculoSegunPersonas() {
+    if (!this.destinoSeleccionado || this.numeroPersonas <= 0) {
+      this.autoSeleccionado = null;
+      this.asientosCroquis = [];
+      this.copiloto = null;
+      return;
     }
+
+    this.cargando = true;
+    this.errorApi = null;
+
+    this.api.getAutos().subscribe({
+      next: (autos) => {
+        let autoFiltrado: AutoDto | null = null;
+
+        if (this.numeroPersonas <= 4) {
+          autoFiltrado = autos.find(a => 
+            (a.marca?.toLowerCase() || '').includes('toyota') && (a.cantidadAsiento || 0) <= 5
+          ) || autos.find(a => (a.cantidadAsiento || 0) <= 5) || null;
+        } else {
+          autoFiltrado = autos.find(a => {
+            const tipo = (a.tipo?.toLowerCase() || '');
+            const modelo = (a.modelo?.toLowerCase() || '');
+            return ['minivan', 'combi', 'hiace', 'master'].some(t => tipo.includes(t) || modelo.includes(t));
+          }) || autos.find(a => (a.cantidadAsiento || 0) >= 10) || null;
+        }
+
+        this.autoSeleccionado = autoFiltrado;
+
+        if (this.autoSeleccionado) {
+          this.cargarAsientosDelVehiculo(this.autoSeleccionado);
+        } else {
+          this.errorApi = 'No se encontró vehículo disponible para esa cantidad de personas.';
+        }
+      },
+      error: () => this.errorApi = 'Error al cargar vehículos',
+      complete: () => this.cargando = false
+    });
+  }
+
+  private cargarAsientosDelVehiculo(auto: AutoDto) {
+    if (!auto || !auto.id) return;
+
+    this.api.getAsientos().subscribe({
+      next: (todosAsientos) => {
+        const asientosBackend = todosAsientos.filter(a => a.idAuto === auto.id);
+        this.asientos = this.completarAsientosVehiculo(asientosBackend, auto);
+
+        this.copiloto = this.asientos.find(a => 
+          a?.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a?.numeroAsiento || '')
+        ) || null;
+
+        const restantes = this.asientos.filter(a => a.id !== this.copiloto?.id);
+        this.asientosCroquis = this.crearCroquis(restantes, auto);
+      }
+    });
   }
 
   private completarAsientosVehiculo(asientosBackend: AsientoDto[], auto: AutoDto | null): AsientoDto[] {
-    if (!auto) return this.ordenarAsientos(asientosBackend);
+    if (!auto) return asientosBackend;
 
     const total = Number(auto.cantidadAsiento) || 15;
     const mapa = new Map(asientosBackend.map(a => [this.normalizarNumero(a.numeroAsiento), a]));
+
     return Array.from({length: total}, (_, i) => {
       const num = String(i + 1);
       return mapa.get(num) ?? {
         id: `virtual-${auto.id}-${num}`,
         idAuto: auto.id,
         numeroAsiento: num,
-        estado: 'libre',
+        estado: 'libre' as const,
         idReserva: null
       };
     });
   }
 
   private crearCroquis(asientos: AsientoDto[], auto: AutoDto | null): AsientoSlot[][] {
-    const tipo = (auto?.tipo + ' ' + auto?.marca + ' ' + auto?.modelo || '').toLowerCase();
+    const tipo = ((auto?.tipo || '') + ' ' + (auto?.marca || '') + ' ' + (auto?.modelo || '')).toLowerCase();
     if (tipo.includes('minivan') || tipo.includes('master') || tipo.includes('hiace')) {
       return this.crearCroquisMinivan15(asientos);
     }
@@ -188,8 +213,10 @@ export class Reservas implements OnInit {
   }
 
   abrirFormularioPasajeros() {
-    if (this.asientosSeleccionados.length === 0 || !this.destinoSeleccionado) return;
-    this.pasajeros = this.asientosSeleccionados.map(() => ({ nombre: '', apellido: '', dni: 0, email: '', telefono: '' }));
+    if (this.asientosSeleccionados.length === 0) return;
+    this.pasajeros = this.asientosSeleccionados.map(() => ({
+      nombre: '', apellido: '', dni: 0, email: '', telefono: '', origen: ''
+    }));
     this.mostrarModal = true;
   }
 
@@ -200,7 +227,7 @@ export class Reservas implements OnInit {
   }
 
   async confirmarReservas() {
-    if (!this.destinoSeleccionado || this.pasajeros.length === 0) return;
+    if (!this.destinoSeleccionado || this.asientosSeleccionados.length === 0) return;
 
     this.cargando = true;
     this.errorApi = null;
@@ -211,15 +238,20 @@ export class Reservas implements OnInit {
         const asiento = this.asientosSeleccionados[i];
 
         const asientoBackend = asiento.id.startsWith('virtual-')
-          ? await firstValueFrom(this.api.createAsiento({ idAuto: asiento.idAuto, numeroAsiento: asiento.numeroAsiento, estado: 'libre' }))
+          ? await firstValueFrom(this.api.createAsiento({ 
+              idAuto: asiento.idAuto, 
+              numeroAsiento: asiento.numeroAsiento, 
+              estado: 'libre' 
+            }))
           : asiento;
 
-        const payload: ReservaCreatePayload = {
+        const payload = {
           nombre: p.nombre,
           apellido: p.apellido,
           email: p.email,
           telefono: p.telefono,
-          destino: this.destinoSeleccionado.title || this.destinoSeleccionado.name || '',
+          origen: p.origen,                    // ← NUEVO
+          destino: this.destinoSeleccionado.title || '',
           fechaIda: this.fechaSalida,
           fechaVuelta: this.fechaSalida,
           dni: p.dni,
@@ -231,28 +263,14 @@ export class Reservas implements OnInit {
         await firstValueFrom(this.api.reservarAsiento(asientoBackend.id, reserva.id));
       }
 
-      // Enviar correo sin mostrar errores en consola
-      const principal = this.pasajeros[0];
-      if (principal?.email) {
-        try {
-          await firstValueFrom(this.api.enviarConfirmacionReserva({
-            to: principal.email.trim(),
-            nombre: `${principal.nombre} ${principal.apellido}`.trim(),
-            destino: this.destinoSeleccionado.title || this.destinoSeleccionado.name || '',
-            fecha: this.fechaSalida,
-            asientos: this.asientosSeleccionados.map(a => a.numeroAsiento).join(', '),
-            totalAsientos: this.asientosSeleccionados.length
-          }));
-        } catch {}
-      }
-
       this.reservasConfirmadas = this.asientosSeleccionados.length;
       this.enviado = true;
       this.mostrarModal = false;
       this.asientosSeleccionados = [];
 
     } catch (error) {
-      this.errorApi = 'Reserva realizada con éxito';
+      console.error(error);
+      this.errorApi = 'Error al confirmar la reserva';
     } finally {
       this.cargando = false;
     }
@@ -264,8 +282,8 @@ export class Reservas implements OnInit {
     this.pasajeros = [];
     this.mostrarModal = false;
     this.destinoSeleccionado = null;
-    this.paqueteSeleccionado = null;
     this.autoSeleccionado = null;
+    this.numeroPersonas = 0;
     this.errorApi = null;
   }
 }

@@ -5,6 +5,40 @@ import { environment } from '../../environments/environment';
 
 
 
+export interface Pasajero {
+  nombre: string;
+  apellido: string;
+  dni: number;
+  email: string;
+  telefono: string;
+  origen: string;           // ← NUEVO
+}
+
+export interface PagoReservaForm {
+  monto: number | null;
+  metodo: string;
+  estado: string;
+  referencia: string;
+  fechaPago: string;
+}
+
+export interface AdminReservaForm {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  destino: string;
+  fechaIda: string;
+  fechaVuelta: string;
+  dni: number | null;
+  idAutos: string[];
+  idAsiento: string;
+  notas: string;
+  monto: number | null;
+  metodo: string;
+  referencia: string;
+  origen: string;           // ← NUEVO
+}
 
 export interface PaqueteDto {
   id: string;
@@ -52,6 +86,13 @@ export interface UserDto {
   email: string;
   telefono: string;
   rol: 'admin' | 'conductor';
+  password?: string;
+
+  licencia?: string;
+  tipoLicencia?: string;
+  fechaVencimientoLicencia?: string;
+  experienciaAnios?: number;
+  tipoVehiculo?: string;
 }
 
 export interface UserCreatePayload {
@@ -79,7 +120,7 @@ export interface DestinoDto {
   name: string;
   bg: string;
   thumb: string;
-  idAuto?: string;
+  idAutos?: string[];
 }
 
 export interface DestinoCreatePayload {
@@ -89,7 +130,7 @@ export interface DestinoCreatePayload {
   name: string;
   bg?: string;
   thumb?: string;
-  idAuto?: string;
+  idAutos?: string[];
 }
 
 export interface DestinoUpdatePayload {
@@ -99,7 +140,7 @@ export interface DestinoUpdatePayload {
   name?: string;
   bg?: string;
   thumb?: string;
-  idAuto?: string;
+  idAutos?: string[];
 }
 
 export interface TourDto {
@@ -144,6 +185,7 @@ export interface ReservaDto {
   fechaIda: string;
   fechaVuelta: string;
   dni: number;
+  origen: string;
   idAsiento: string;
   notas: string;
   createdAt: string;
@@ -154,6 +196,7 @@ export interface ReservaCreatePayload {
   apellido: string;
   email: string;
   telefono: string;
+  origen: string;
   destino: string;
   fechaIda: string;
   fechaVuelta: string;
@@ -234,13 +277,7 @@ export interface ContactoCreatePayload {
   mensaje: string;
 }
 
-interface Pasajero {
-  nombre: string;
-  apellido: string;
-  dni: number;
-  email: string;
-  telefono: string;
-}
+
 
 @Injectable({ providedIn: 'root' })
 export class G7ApiService {

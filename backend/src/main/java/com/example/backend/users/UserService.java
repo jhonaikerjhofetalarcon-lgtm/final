@@ -35,6 +35,16 @@ public class UserService {
     e.setTelefono(req.telefono());
     e.setRol(req.rol());
     e.setPasswordHash(encoder.encode(req.password()));
+
+    // Campos Conductor
+    if (req.rol() == UserRole.conductor) {
+      e.setLicencia(req.licencia());
+      e.setTipoLicencia(req.tipoLicencia());
+      e.setFechaVencimientoLicencia(req.fechaVencimientoLicencia());
+      e.setExperienciaAnios(req.experienciaAnios());
+      e.setTipoVehiculo(req.tipoVehiculo());
+    }
+
     return UserResponse.from(repo.save(e));
   }
 
@@ -51,6 +61,15 @@ public class UserService {
 
     if (req.password() != null && !req.password().isBlank())
       e.setPasswordHash(encoder.encode(req.password()));
+
+    // Actualizar campos de conductor
+    if (req.rol() == UserRole.conductor) {
+      e.setLicencia(req.licencia());
+      e.setTipoLicencia(req.tipoLicencia());
+      e.setFechaVencimientoLicencia(req.fechaVencimientoLicencia());
+      e.setExperienciaAnios(req.experienciaAnios());
+      e.setTipoVehiculo(req.tipoVehiculo());
+    }
 
     return UserResponse.from(repo.save(e));
   }

@@ -94,11 +94,6 @@
   font-weight: 900;
 }
 
-.admin-form-head p {
-  margin: 0;
-  color: #687989;
-}
-
 .admin-reserva-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -132,8 +127,7 @@
 }
 
 .admin-reserva-grid input,
-.admin-reserva-grid select,
-.admin-reserva-grid textarea {
+.admin-reserva-grid select {
   width: 100%;
   min-height: 40px;
   padding: 9px 11px;
@@ -145,13 +139,8 @@
   outline: none;
 }
 
-.admin-reserva-grid textarea {
-  resize: vertical;
-}
-
 .admin-reserva-grid input:focus,
-.admin-reserva-grid select:focus,
-.admin-reserva-grid textarea:focus {
+.admin-reserva-grid select:focus {
   border-color: #0d8f7d;
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(13, 143, 125, 0.12);
@@ -170,9 +159,6 @@
 }
 
 .vehicle-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
   padding: 14px;
   color: #243545;
 }
@@ -196,26 +182,6 @@
   font-weight: 900;
 }
 
-.seat-map-title span {
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #e5f4f1;
-  color: #0b7568;
-  font-size: 0.78rem;
-}
-
-.selected-seat-field {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 9px 11px;
-  border: 1px solid #d7e1e8;
-  border-radius: 8px;
-  background: #f8fbfc;
-  color: #0b7568;
-  font-weight: 900;
-}
-
 .vehicle-map-admin {
   position: relative;
   max-width: 360px;
@@ -223,6 +189,7 @@
   border-radius: 28px;
   background: linear-gradient(180deg, #263448, #111827);
   box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.08);
+  margin-bottom: 14px;
 }
 
 .vehicle-map-admin::before {
@@ -235,15 +202,6 @@
   border-radius: 0 0 14px 14px;
   background: #93a4b8;
   transform: translateX(-50%);
-}
-
-.vehicle-label-admin {
-  margin-bottom: 14px;
-  color: #dbeafe;
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-align: center;
-  text-transform: uppercase;
 }
 
 .front-row-admin {
@@ -335,7 +293,7 @@
   gap: 6px;
 }
 
-.seat-legend-admin i {
+.seat-legend-admin span span {
   width: 16px;
   height: 16px;
   border-radius: 4px;
@@ -354,7 +312,7 @@
   background: #eab308;
 }
 
-.seat-map-admin p {
+.info-text, .seat-map-admin p {
   margin: 0;
   color: #687989;
 }
@@ -412,12 +370,6 @@
   border-bottom: 0;
 }
 
-.td-n {
-  width: 52px;
-  color: #718292;
-  font-weight: 900;
-}
-
 .data-table strong {
   color: #102332;
 }
@@ -427,132 +379,29 @@
   line-height: 1.6;
 }
 
-.td-act {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  min-width: 220px;
+.status-paid {
+  color: #0b7568;
+  font-weight: 800;
 }
 
-.btn-pay,
-.paid-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 900;
-  white-space: nowrap;
+.status-pending {
+  color: #687989;
+  font-weight: 800;
 }
 
-.btn-pay {
+.btn-small {
   border: 0;
   background: #0d8f7d;
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 8px 18px rgba(13, 143, 125, 0.18);
-  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.btn-pay:hover:not(:disabled) {
-  transform: translateY(-1px);
-  background: #0b7568;
-  box-shadow: 0 10px 22px rgba(13, 143, 125, 0.24);
-}
-
-.btn-pay:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
-
-.paid-badge {
-  background: #e5f4f1;
-  color: #0b7568;
-}
-
-.payment-form-row td {
-  padding: 0 16px 18px !important;
-  background: #f8fbff !important;
-}
-
-.payment-form {
-  display: grid;
-  grid-template-columns: 0.55fr 1.2fr 1fr 1.2fr 1fr 1.5fr 1.35fr 1.6fr;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid #dce8f0;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: inset 4px 0 0 #0d8f7d, 0 10px 24px rgba(19, 43, 59, 0.08);
-}
-
-.payment-title {
-  grid-column: 1 / -1;
-  color: #102332;
-  font-size: 0.95rem;
-  font-weight: 900;
-}
-
-.pay-field,
-.pay-actions {
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-}
-
-.pay-field label,
-.pay-actions label {
-  color: #607385;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.pay-field span,
-.state-preview {
-  display: inline-flex;
-  align-items: center;
-  min-height: 38px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: #f1f5f8;
-  color: #243545;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-weight: 800;
 }
 
-.state-preview {
-  background: #e5f4f1 !important;
-  color: #0b7568 !important;
-  text-transform: capitalize;
-}
-
-.pay-field input,
-.pay-field select {
-  width: 100%;
-  min-height: 38px;
-  padding: 8px 10px;
-  border: 1px solid #d7e1e8;
-  border-radius: 8px;
-  background: #f8fbfc;
-  color: #17212b;
-  font: inherit;
-  outline: none;
-}
-
-.pay-field input:focus,
-.pay-field select:focus {
-  border-color: #0d8f7d;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(13, 143, 125, 0.12);
-}
-
-.pay-actions > div {
-  display: flex;
-  gap: 8px;
+.btn-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-save-pay,
@@ -621,45 +470,24 @@
   .search-wrap {
     width: 100%;
   }
-}
 
-@media (max-width: 1100px) {
-  .admin-reserva-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .vehicle-summary {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 1180px) {
-  .payment-form {
-    grid-template-columns: repeat(3, minmax(170px, 1fr));
-  }
-
-  .pay-index {
-    display: none;
-  }
-}
-
-@media (max-width: 760px) {
   .admin-form-head,
   .admin-form-actions {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .admin-reserva-grid,
-  .payment-form {
+  .admin-reserva-grid {
     grid-template-columns: 1fr;
   }
 
   .full-field {
     grid-column: auto;
   }
+}
 
-  .pay-actions > div {
-    flex-direction: column;
+@media (max-width: 1100px) {
+  .admin-reserva-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

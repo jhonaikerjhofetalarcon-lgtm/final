@@ -1,5 +1,7 @@
 package com.example.backend.destinos;
 
+import java.util.List;
+
 public record DestinoResponse(
   String id,
   String label,
@@ -8,7 +10,7 @@ public record DestinoResponse(
   String name,
   String bg,
   String thumb,
-  String idAuto) {     // ← Agregado
+  List<String> idAutos) {
 
   public static DestinoResponse from(DestinoEntity e) {
     return new DestinoResponse(
@@ -19,7 +21,7 @@ public record DestinoResponse(
       e.getName(),
       e.getBg(),
       e.getThumb(),
-      e.getIdAuto()
+      e.getIdAutos()
     );
   }
 }

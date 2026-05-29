@@ -25,8 +25,7 @@ public class ReservaRepository {
   }
 
   public List<ReservaEntity> findAllOrderByCreatedAtDesc() {
-    QuerySnapshot snap = get(col.orderBy("createdAt",
-      com.google.cloud.firestore.Query.Direction.DESCENDING).get());
+    QuerySnapshot snap = get(col.orderBy("createdAt", com.google.cloud.firestore.Query.Direction.DESCENDING).get());
     return snap.getDocuments().stream().map(this::toEntity).toList();
   }
 
@@ -45,18 +44,18 @@ public class ReservaRepository {
       throw new IllegalArgumentException("id requerido");
 
     Map<String, Object> data = new HashMap<>();
-    data.put("nombre",      e.getNombre());
-    data.put("apellido",    e.getApellido());
-    data.put("email",       e.getEmail());
-    data.put("telefono",    e.getTelefono());
-    data.put("destino",     e.getDestino());
-    data.put("fechaIda",    e.getFechaIda() != null ? e.getFechaIda().toString() : "");
+    data.put("nombre", e.getNombre());
+    data.put("apellido", e.getApellido());
+    data.put("email", e.getEmail());
+    data.put("telefono", e.getTelefono());
+    data.put("destino", e.getDestino());
+    data.put("fechaIda", e.getFechaIda() != null ? e.getFechaIda().toString() : "");
     data.put("fechaVuelta", e.getFechaVuelta() != null ? e.getFechaVuelta().toString() : "");
     data.put("dni", e.getDni());
     data.put("idAsiento", e.getIdAsiento() != null ? e.getIdAsiento() : "");
-    data.put("notas",       e.getNotas() != null ? e.getNotas() : "");
-
-    data.put("createdAt",   e.getCreatedAt() != null ? e.getCreatedAt().toString() : Instant.now().toString());
+    data.put("notas", e.getNotas() != null ? e.getNotas() : "");
+    data.put("origen", e.getOrigen() != null ? e.getOrigen() : "");  // ← NUEVO
+    data.put("createdAt", e.getCreatedAt() != null ? e.getCreatedAt().toString() : Instant.now().toString());
 
     get(col.document(e.getId()).set(data));
     return e;
@@ -75,21 +74,23 @@ public class ReservaRepository {
     e.setTelefono(safeStr(d, "telefono"));
     e.setDestino(safeStr(d, "destino"));
     e.setNotas(safeStr(d, "notas"));
+    e.setOrigen(safeStr(d, "origen"));        // ← NUEVO
 
-    String fechaIda = safeStr(d, "fechaIda");
-    if (!fechaIda.isBlank()) {
-      try { e.setFechaIda(LocalDate.parse(fechaIda)); } catch (Exception ignored) {}
+    // Fechas
+    String fechaIdaStr = safeStr(d, "fechaIda");
+    if (!fechaIdaStr.isBlank()) {
+      try { e.setFechaIda(LocalDate.parse(fechaIdaStr)); } catch (Exception ignored) {}
     }
 
-    String fechaVuelta = safeStr(d, "fechaVuelta");
-    if (!fechaVuelta.isBlank()) {
-      try { e.setFechaVuelta(LocalDate.parse(fechaVuelta)); } catch (Exception ignored) {}
+    String fechaVueltaStr = safeStr(d, "fechaVuelta");
+    if (!fechaVueltaStr.isBlank()) {
+      try { e.setFechaVuelta(LocalDate.parse(fechaVueltaStr)); } catch (Exception ignored) {}
     }
 
     e.setDni(safeInt(d, "dni"));
     e.setIdAsiento(safeStr(d, "idAsiento"));
-
     e.setCreatedAt(safeInstant(d, "createdAt"));
+
     return e;
   }
 
@@ -101,24 +102,18 @@ public class ReservaRepository {
   private int safeInt(DocumentSnapshot d, String field) {
     Object v = d.get(field);
     if (v instanceof Number n) return n.intValue();
-    if (v instanceof String s) { try { return Integer.parseInt(s); } catch (Exception ignored) {} }
+    if (v instanceof String s) {
+      try { return Integer.parseInt(s); } catch (Exception ignored) {}
+    }
     return 0;
   }
 
   private Instant safeInstant(DocumentSnapshot d, String field) {
     Object v = d.get(field);
-    if (v instanceof com.google.cloud.Timestamp ts)
-      return ts.toDate().toInstant();
-    if (v instanceof Map<?, ?> map) {
-      Object secs = map.get("seconds");
-      Object nano  = map.get("nanos");
-      if (secs instanceof Number n)
-        return Instant.ofEpochSecond(n.longValue(),
-          nano instanceof Number nn ? nn.longValue() : 0);
-    }
+    if (v instanceof com.google.cloud.Timestamp ts) return ts.toDate().toInstant();
     if (v instanceof String s && !s.isBlank()) {
       try { return Instant.parse(s); } catch (Exception ignored) {}
     }
-    return Instant.EPOCH;
+    return Instant.now();
   }
 }

@@ -12,10 +12,12 @@ public record ReservaResponse(
   String destino,
   LocalDate fechaIda,
   LocalDate fechaVuelta,
-  int dni,                    // ← cambiado
-  String idAsiento,           // ← nuevo
+  int dni,
+  String idAsiento,
   String notas,
-  Instant createdAt) {
+  String origen,           // ← NUEVO
+  Instant createdAt
+) {
 
   public static ReservaResponse from(ReservaEntity e) {
     return new ReservaResponse(
@@ -30,6 +32,8 @@ public record ReservaResponse(
       e.getDni(),
       e.getIdAsiento(),
       e.getNotas(),
-      e.getCreatedAt());
+      e.getOrigen(),
+      e.getCreatedAt()
+    );
   }
 }

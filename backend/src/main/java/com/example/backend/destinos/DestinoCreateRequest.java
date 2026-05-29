@@ -1,6 +1,7 @@
 package com.example.backend.destinos;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 public record DestinoCreateRequest(
   @NotBlank String label,
@@ -9,5 +10,4 @@ public record DestinoCreateRequest(
   @NotBlank String name,
   @NotBlank String bg,
   String thumb,
-  String idAuto) {
-}
+  List<String> idAutos) {}     // ← Cambiado a List
