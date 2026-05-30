@@ -42,6 +42,9 @@ export class Reservas implements OnInit {
   reservas: ReservaDto[] = [];
   pagos: PagoDto[] = [];
   autos: AutoDto[] = [];
+  asientosFormulario: AsientoDto[] = [];
+  asientosCroquisFormulario: AsientoSlot[][] = [];
+  copilotoFormulario: AsientoDto | null = null;
   procesandoPagoId: string | null = null;
   pagoFormReservaId: string | null = null;
   pagoForm: PagoReservaForm = this.nuevoPagoForm();
@@ -65,12 +68,16 @@ export class Reservas implements OnInit {
     this.api.getReservas().subscribe(data => this.reservas = data || []);
     this.api.getPagos().subscribe(data => this.pagos = data || []);
     this.api.getAutos().subscribe(data => this.autos = data || []);
+    this.api.getAsientos().subscribe(data => this.asientos = data || []);
   }
 
   // ====================== MÉTODOS ADMIN ======================
   abrirFormularioReserva() {
     this.formVisible = true;
     this.reservaForm = this.nuevaReservaForm();
+    this.asientosFormulario = [];
+    this.asientosCroquisFormulario = [];
+    this.copilotoFormulario = null;
   }
 
   cerrarFormularioReserva() {
@@ -82,10 +89,15 @@ export class Reservas implements OnInit {
     const destino = this.destinos.find(d => d.title === this.reservaForm.destino);
     if (destino) {
       this.reservaForm.idAutos = destino.idAutos || [];
+      this.reservaForm.idAsiento = '';
+      this.cargarAsientosFormulario();
     }
   }
 
-  onAutoReservaChange() {}
+  onAutoReservaChange() {
+    this.reservaForm.idAsiento = '';
+    this.cargarAsientosFormulario();
+  }
 
   destinoSeleccionadoAdmin() {
     return this.destinos.find(d => d.title === this.reservaForm.destino);
@@ -97,36 +109,98 @@ export class Reservas implements OnInit {
   }
 
   asientosCroquisAdmin(): AsientoSlot[][] {
-    return [];
+    return this.asientosCroquisFormulario;
   }
 
   copilotoAdmin(): AsientoDto | null {
-    return null;
+    return this.copilotoFormulario;
   }
 
   asientoSeleccionadoAdmin(): AsientoDto | undefined {
-    return undefined;
+    return this.asientosFormulario.find(a => a.id === this.reservaForm.idAsiento);
   }
 
-  asientoDisponibleParaFecha(asiento: any): boolean {
-    return true;
+  asientoDisponibleParaFecha(asiento: AsientoDto): boolean {
+    return asiento.id === this.reservaForm.idAsiento || asiento.estado === 'libre';
   }
 
-  seleccionarAsientoAdmin(asiento: any) {
-    if (asiento) this.reservaForm.idAsiento = asiento.id;
+  seleccionarAsientoAdmin(asiento: AsientoDto) {
+    if (!asiento || !this.asientoDisponibleParaFecha(asiento)) return;
+    this.reservaForm.idAsiento = this.reservaForm.idAsiento === asiento.id ? '' : asiento.id;
   }
 
   asientoNumeroReserva(r: ReservaDto): string {
-    return r.idAsiento ? `Asiento ${r.idAsiento}` : '-';
+    if (!r.idAsiento) return '-';
+
+    const asiento = this.asientos.find(a => a.id === r.idAsiento);
+    if (asiento?.numeroAsiento) {
+      return `Asiento ${asiento.numeroAsiento}`;
+    }
+
+    const nota = String(r.notas || '').match(/Asiento\s+([^\s-]+)/i);
+    return nota ? `Asiento ${nota[1]}` : `Asiento ${r.idAsiento}`;
+  }
+
+  vehiculoReserva(r: ReservaDto): string {
+    const asiento = this.asientos.find(a => a.id === r.idAsiento);
+    const auto = asiento ? this.autos.find(a => a.id === asiento.idAuto) : null;
+
+    if (auto) {
+      return `${auto.placa} - ${auto.marca} ${auto.modelo}`;
+    }
+
+    const nota = String(r.notas || '');
+    const vehiculoEnNota = nota.match(/Asiento\s+[^\s-]+\s+-\s+(.+)$/i);
+    return vehiculoEnNota?.[1]?.trim() || '-';
   }
 
   reservaPagada(id: string): boolean {
     return this.pagos.some(p => p.reservaId === id && p.estado === 'completado');
   }
 
-  confirmarPagoReserva(r: ReservaDto) {
+  abrirPagoReserva(r: ReservaDto) {
+    this.errorApi = null;
+    this.pagoFormReservaId = this.pagoFormReservaId === r.id ? null : r.id;
+    this.pagoForm = this.nuevoPagoForm();
+  }
+
+  cancelarPagoReserva() {
+    this.pagoFormReservaId = null;
+    this.pagoForm = this.nuevoPagoForm();
+    this.procesandoPagoId = null;
+  }
+
+  async guardarPagoReserva(r: ReservaDto) {
+    const monto = Number(this.pagoForm.monto);
+    if (!monto || monto <= 0 || !this.pagoForm.metodo) {
+      this.errorApi = 'Completa el monto y metodo de pago.';
+      return;
+    }
+
     this.procesandoPagoId = r.id;
-    setTimeout(() => this.procesandoPagoId = null, 1000);
+    this.errorApi = null;
+
+    try {
+      const pago = await firstValueFrom(this.api.createPago({
+        reservaId: r.id,
+        monto,
+        metodo: this.pagoForm.metodo,
+        referencia: this.pagoForm.referencia || '',
+        comprobanteUrl: ''
+      }));
+
+      if (this.pagoForm.estado === 'completado') {
+        await firstValueFrom(this.api.confirmarPago(pago.id));
+      }
+
+      this.cancelarPagoReserva();
+      this.cargarDatosAdmin();
+    } catch (error) {
+      console.error(error);
+      this.errorApi = 'No se pudo registrar el pago.';
+    } finally {
+      this.procesandoPagoId = null;
+    }
   }
 
   eliminar(r: ReservaDto) {
@@ -150,6 +224,37 @@ export class Reservas implements OnInit {
   }
 
   guardarReservaConPago() {
+    const auto = this.autoSeleccionadoAdmin();
+    const asiento = this.asientoSeleccionadoAdmin();
+    const monto = Number(this.reservaForm.monto);
+
+    if (!this.reservaForm.nombre.trim() || !this.reservaForm.apellido.trim() || !this.reservaForm.email.trim() ||
+        !this.reservaForm.telefono.trim() || !this.reservaForm.destino || !auto || !asiento) {
+      this.errorApi = 'Completa cliente, destino, vehiculo y asiento.';
+      return;
+    }
+
+    if (!monto || monto <= 0 || !this.reservaForm.metodo) {
+      this.errorApi = 'Completa el monto y metodo de pago.';
+      return;
+    }
+
+    this.guardandoReserva = true;
+    this.errorApi = null;
+
+    this.guardarReservaAdmin(auto, asiento, monto)
+      .then(() => {
+        alert('Reserva guardada correctamente');
+        this.cargarDatosAdmin();
+        this.cerrarFormularioReserva();
+      })
+      .catch((error) => {
+        console.error(error);
+        this.errorApi = 'No se pudo guardar la reserva.';
+      })
+      .finally(() => this.guardandoReserva = false);
+    return;
+
     this.guardandoReserva = true;
     setTimeout(() => {
       alert('✅ Reserva guardada correctamente');
@@ -159,6 +264,66 @@ export class Reservas implements OnInit {
   }
 
   // ====================== MÉTODOS PÚBLICOS ======================
+  private async guardarReservaAdmin(auto: AutoDto, asiento: AsientoDto, monto: number): Promise<void> {
+    const asientoBackend = asiento.id.startsWith('virtual-')
+      ? await firstValueFrom(this.api.createAsiento({
+          idAuto: asiento.idAuto,
+          numeroAsiento: asiento.numeroAsiento,
+          estado: 'libre'
+        }))
+      : asiento;
+
+    const reserva = await firstValueFrom(this.api.createReserva({
+      nombre: this.reservaForm.nombre.trim(),
+      apellido: this.reservaForm.apellido.trim(),
+      email: this.reservaForm.email.trim(),
+      telefono: this.reservaForm.telefono.trim(),
+      origen: this.reservaForm.origen?.trim() || 'No especificado',
+      destino: this.reservaForm.destino,
+      fechaIda: this.reservaForm.fechaIda,
+      fechaVuelta: this.reservaForm.fechaVuelta || this.reservaForm.fechaIda,
+      dni: Number(this.reservaForm.dni) || 0,
+      idAsiento: asientoBackend.id,
+      notas: `Asiento ${asiento.numeroAsiento} - ${auto.placa} ${auto.marca} ${auto.modelo}`.trim()
+    }));
+
+    const pago = await firstValueFrom(this.api.createPago({
+      reservaId: reserva.id,
+      monto,
+      metodo: this.reservaForm.metodo,
+      referencia: this.reservaForm.referencia || '',
+      comprobanteUrl: ''
+    }));
+
+    await firstValueFrom(this.api.reservarAsiento(asientoBackend.id, reserva.id));
+    await firstValueFrom(this.api.confirmarPago(pago.id));
+  }
+
+  private cargarAsientosFormulario() {
+    const auto = this.autoSeleccionadoAdmin();
+    this.asientosFormulario = [];
+    this.asientosCroquisFormulario = [];
+    this.copilotoFormulario = null;
+
+    if (!auto) return;
+
+    this.api.getAsientos().subscribe({
+      next: (todosAsientos) => {
+        this.asientos = todosAsientos || [];
+        const asientosBackend = this.asientos.filter(a => a.idAuto === auto.id);
+        this.asientosFormulario = this.completarAsientosVehiculo(asientosBackend, auto);
+
+        this.copilotoFormulario = this.asientosFormulario.find(a =>
+          a.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a.numeroAsiento || '')
+        ) || null;
+
+        const restantes = this.asientosFormulario.filter(a => a.id !== this.copilotoFormulario?.id);
+        this.asientosCroquisFormulario = this.crearCroquis(restantes, auto);
+      },
+      error: () => this.errorApi = 'No se pudieron cargar los asientos del vehiculo.'
+    });
+  }
+
   onDestinoChange() {
     this.numeroPersonas = 0;
     this.autoSeleccionado = null;
@@ -279,11 +444,15 @@ export class Reservas implements OnInit {
   }
 
   toggleAsiento(asiento: AsientoDto) {
-    if (asiento.estado !== 'libre') return;
     const idx = this.asientosSeleccionados.findIndex(a => a.id === asiento.id);
     if (idx >= 0) {
       this.asientosSeleccionados.splice(idx, 1);
       asiento.estado = 'libre';
+      return;
+    }
+
+    if (asiento.estado !== 'libre') {
+      return;
     } else {
       this.asientosSeleccionados.push(asiento);
       asiento.estado = 'reservado';

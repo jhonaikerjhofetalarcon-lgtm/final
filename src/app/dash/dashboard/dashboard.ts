@@ -137,7 +137,7 @@ export class Dashboard implements OnInit {
 
   // --- NUEVAS ESTADÍSTICAS ---
   totalPaquetesActivos(): number {
-    return this.paquetes.filter(p => p.estado).length;
+    return this.paquetes.filter(p => p.estado !== false).length;
   }
 
   totalOfertasVigentes(): number {

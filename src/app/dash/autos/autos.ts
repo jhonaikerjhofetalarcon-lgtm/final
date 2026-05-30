@@ -55,13 +55,17 @@ export class Autos implements OnInit {
   }
 
   guardar() {
-    if (!this.fAuto.placa?.trim() || !this.fAuto.marca?.trim()) {
-      alert('Placa y Marca son obligatorios');
+    const payload = this.autoPayload();
+
+    if (!payload.placa || !payload.marca || !payload.modelo || !payload.color) {
+      alert('Placa, marca, modelo y color son obligatorios');
       return;
     }
 
-    const payload = { ...this.fAuto };
-    delete payload.id; // No enviar id en create
+    if (payload.anioFabrica < 1990 || payload.cantidadAsiento < 1) {
+      alert('Revisa el anio de fabricacion y la cantidad de asientos');
+      return;
+    }
 
     const operacion = this.editingId
       ? this.api.updateAuto(this.editingId, payload)
@@ -110,6 +114,20 @@ export class Autos implements OnInit {
     console.log(msg);
   }
 
+  private autoPayload() {
+    return {
+      placa: String(this.fAuto.placa || '').trim().toUpperCase(),
+      marca: String(this.fAuto.marca || '').trim(),
+      modelo: String(this.fAuto.modelo || '').trim(),
+      color: String(this.fAuto.color || '').trim(),
+      anioFabrica: Number(this.fAuto.anioFabrica) || new Date().getFullYear(),
+      cantidadAsiento: Number(this.fAuto.cantidadAsiento) || 0,
+      tipo: String(this.fAuto.tipo || '').trim() || 'renault master',
+      conductor: String(this.fAuto.conductor || '').trim(),
+      estado: String(this.fAuto.estado || '').trim() || 'activo'
+    };
+  }
+
   private emptyAuto() {
     return {
       placa: '',
@@ -118,7 +136,7 @@ export class Autos implements OnInit {
       color: '',
       anioFabrica: new Date().getFullYear(),
       cantidadAsiento: 15,
-      tipo: 'minivan',
+      tipo: 'renault master',
       conductor: '',
       estado: 'activo'
     };

@@ -12,10 +12,10 @@ import { AuthService } from '../../core/Auth.service';
   styleUrls: ['./login.css'],
 })
 export class Login {
-  private readonly auth   = inject(AuthService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  email    = '';
+  email = '';
   password = '';
   error: string | null = null;
   cargando = false;
@@ -26,26 +26,51 @@ export class Login {
       this.error = 'Ingresa tu email y contraseña.';
       return;
     }
-    this.error    = null;
+
+    this.error = null;
     this.cargando = true;
 
-    this.auth.login({ email: this.email.trim(), password: this.password }).subscribe({
-      next: (user) => {
-        this.cargando = false;
-        // Solo admins acceden al panel
-        if (user.rol === 'admin') {
-          this.router.navigate(['../dash/dashboard']);
-        } else {
-          // Conductores u otros roles van a home
-          this.router.navigate(['/home']);
-        }
-      },
+    this.auth.login({
+      email: this.email.trim(),
+      password: this.password
+    }).subscribe({
+next: (user) => {
+  this.cargando = false;
+
+  console.log('================================');
+  console.log('LOGIN EXITOSO');
+  console.log('USUARIO COMPLETO:', user);
+
+  const rol = this.auth.roleOf(user);
+
+  console.log('ROL FINAL:', rol);
+
+  if (rol === 'admin' || rol === 'administrador') {
+    console.log('REDIRIGIENDO A DASHBOARD ADMIN');
+    this.router.navigate(['/dash/overview']);
+    return;
+  }
+
+  if (rol === 'conductor' || rol === 'driver') {
+    console.log('REDIRIGIENDO A PANEL CONDUCTOR');
+    this.router.navigate(['/conductor']);
+    return;
+  }
+
+  console.log('ROL DESCONOCIDO');
+
+  this.auth.logout();
+  this.error = 'No tienes permisos para ingresar.';
+},
+
       error: () => {
         this.cargando = false;
-        this.error    = 'Email o contraseña incorrectos.';
-      },
+        this.error = 'Email o contraseña incorrectos.';
+      }
     });
   }
 
-  togglePass(): void { this.showPass = !this.showPass; }
+  togglePass(): void {
+    this.showPass = !this.showPass;
+  }
 }

@@ -10,6 +10,10 @@
     </button>
   </div>
 
+  @if (errorApi) {
+  <div class="inline-alert">{{ errorApi }}</div>
+  }
+
   @if (formVisible) {
   <div class="admin-reserva-card">
     <div class="admin-form-head">
@@ -146,6 +150,7 @@
             <th>#</th>
             <th>Cliente</th>
             <th>Destino</th>
+            <th>Vehiculo</th>
             <th>Fechas</th>
             <th>Asiento</th>
             <th>Estado</th>
@@ -161,6 +166,7 @@
               <small>{{ r.email }}</small>
             </td>
             <td>{{ r.destino }}</td>
+            <td><strong>{{ vehiculoReserva(r) }}</strong></td>
             <td>
               <small>Ida: {{ r.fechaIda | date:'dd/MM' }}</small><br>
               <small>V: {{ r.fechaVuelta | date:'dd/MM' }}</small>
@@ -174,16 +180,62 @@
               }
             </td>
             <td>
-              <button class="btn-small" (click)="confirmarPagoReserva(r)" [disabled]="procesandoPagoId === r.id">
+              <button class="btn-small" (click)="abrirPagoReserva(r)" [disabled]="procesandoPagoId === r.id">
                 💰 Pago
               </button>
               <button class="btn-ico del" (click)="eliminar(r)">🗑️</button>
             </td>
           </tr>
+          @if (pagoFormReservaId === r.id) {
+          <tr class="payment-row">
+            <td colspan="8">
+              <div class="payment-panel">
+                <div class="payment-title">
+                  <strong>Registrar pago</strong>
+                  <span>{{ r.nombre }} {{ r.apellido }} - {{ r.destino }}</span>
+                </div>
+
+                <div class="payment-grid">
+                  <label>
+                    Monto (S/.) *
+                    <input type="number" min="1" step="0.01" [(ngModel)]="pagoForm.monto" placeholder="0.00">
+                  </label>
+                  <label>
+                    Metodo *
+                    <select [(ngModel)]="pagoForm.metodo">
+                      <option value="yape">Yape</option>
+                      <option value="transferencia bcp">Transferencia BCP</option>
+                      <option value="plin">Plin</option>
+                      <option value="efectivo">Efectivo</option>
+                    </select>
+                  </label>
+                  <label>
+                    Estado *
+                    <select [(ngModel)]="pagoForm.estado">
+                      <option value="completado">Completado</option>
+                      <option value="pendiente">Pendiente</option>
+                    </select>
+                  </label>
+                  <label>
+                    Referencia
+                    <input type="text" [(ngModel)]="pagoForm.referencia" placeholder="Codigo de operacion">
+                  </label>
+                </div>
+
+                <div class="payment-actions">
+                  <button class="btn-cancel-pay" (click)="cancelarPagoReserva()" [disabled]="procesandoPagoId === r.id">Cancelar</button>
+                  <button class="btn-save-pay" (click)="guardarPagoReserva(r)" [disabled]="procesandoPagoId === r.id">
+                    {{ procesandoPagoId === r.id ? 'Guardando...' : 'Guardar pago' }}
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+          }
           }
           @if (filtrados().length === 0) {
           <tr>
-            <td colspan="7" class="td-empty">No se encontraron reservas</td>
+            <td colspan="8" class="td-empty">No se encontraron reservas</td>
           </tr>
           }
         </tbody>

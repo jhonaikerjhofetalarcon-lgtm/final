@@ -2,7 +2,9 @@
 
 .paquetes-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background:
+    radial-gradient(circle at top right, rgba(15,143,127,.09), transparent 34%),
+    #f8f9fa;
   color: #1f2937;
   font-family: 'Inter', sans-serif;
 }
@@ -105,7 +107,8 @@
 
 .card-paquete {
   overflow: hidden;
-  border-radius: 14px;
+  border: 1px solid #edf1f5;
+  border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
   transition: transform .28s ease, box-shadow .28s ease;
@@ -164,6 +167,43 @@
   line-height: 1.5;
 }
 
+.lodging-preview {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.lodging-preview span {
+  display: block;
+  margin-bottom: 3px;
+  color: #667085;
+  font-size: .74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.lodging-preview strong {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.lodging-thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.lodging-thumbs img {
+  width: 100%;
+  aspect-ratio: 1.45;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .card-footer {
   display: flex;
   align-items: center;
@@ -193,6 +233,18 @@
 .btn-reserva,
 .btn-detalle {
   padding: 11px 18px;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-reserva:hover,
+.btn-detalle:hover,
+.btn-refresh:hover {
+  transform: translateY(-2px);
+}
+
+.btn-reserva:hover,
+.btn-refresh:hover {
+  box-shadow: 0 10px 20px rgba(192,57,43,.2);
 }
 
 .state {

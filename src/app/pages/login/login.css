@@ -181,6 +181,37 @@
     color: #888;
 }
 
+.login-mode {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.login-mode button {
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1.5px solid #e0dede;
+    border-radius: 10px;
+    background: #fff;
+    color: #555;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, color .2s, transform .15s;
+}
+
+.login-mode button:hover {
+    transform: translateY(-1px);
+    border-color: #c0392b;
+}
+
+.login-mode button.active {
+    border-color: #c0392b;
+    background: #c0392b;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(192, 57, 43, 0.24);
+}
+
 /* Error */
 .login-error {
     background: #fdf0f0;

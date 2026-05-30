@@ -1,49 +1,89 @@
-<section class="contacto-page">
-  <h2>Contáctanos</h2>
-  <p class="sub">Email: g7travel@gmail.com · Teléfono: 999999999</p>
-
-  @if (enviado) {
-    <div class="success-box">
-      <p>¡Gracias! Hemos recibido tu mensaje.</p>
-      <button type="button" class="btn" (click)="otroMensaje()">Enviar otro mensaje</button>
+<main class="contacto-page">
+  <section class="contact-hero">
+    <div class="hero-copy">
+      <span>Turismo G7 Travel</span>
+      <h1>Contactanos</h1>
+      <p>Experiencias unicas, tours en Ayacucho y reservas online siempre disponibles.</p>
     </div>
-  } @else {
-    @if (errorApi) {
-      <p class="api-error" role="alert">{{ errorApi }}</p>
-    }
+  </section>
 
-    <form [formGroup]="form" (ngSubmit)="enviar()" novalidate class="contact-form">
-      <div class="field" [class.error]="invalido('nombre')">
-        <label for="c-nombre">Nombre</label>
-        <input id="c-nombre" type="text" formControlName="nombre" placeholder="Tu nombre" />
-        @if (invalido('nombre')) {
-          <span class="err">Indica tu nombre</span>
-        }
+  <section class="contact-shell">
+    <aside class="contact-info">
+      <span class="tag">Agencia de turismo</span>
+      <h2>Turismo G7 Travel R.H</h2>
+      <p class="intro">Bienvenido a Turismo G7 Travel. Aqui encontraras experiencias unicas con nuestros tours.</p>
+
+      <div class="info-list">
+        <div>
+          <strong>Direccion</strong>
+          <p>Raswilca, Ayacucho, Peru</p>
+        </div>
+        <div>
+          <strong>Telefono</strong>
+          <p>929 733 850</p>
+          <p>+51 929 733 850</p>
+        </div>
+        <div>
+          <strong>Email</strong>
+          <p>turismog7travelr.h&#64;gmail.com</p>
+        </div>
+        <div>
+          <strong>Atencion</strong>
+          <p>Siempre abierto</p>
+          <p>Reservas online · Reservas</p>
+        </div>
       </div>
+    </aside>
 
-      <div class="field" [class.error]="invalido('email')">
-        <label for="c-email">Correo</label>
-        <input id="c-email" type="email" formControlName="email" placeholder="correo@ejemplo.com" />
-        @if (invalido('email')) {
-          <span class="err">Correo no válido</span>
-        }
-      </div>
+    <section class="form-panel">
+      <h2>Escribenos</h2>
+      <p>Cuéntanos tu fecha de viaje, destino de interes o consulta.</p>
 
-      <div class="field" [class.error]="invalido('mensaje')">
-        <label for="c-msg">Mensaje</label>
-        <textarea id="c-msg" rows="5" formControlName="mensaje" placeholder="Escribe tu consulta…"></textarea>
-        @if (invalido('mensaje')) {
-          <span class="err">Mínimo 5 caracteres</span>
+      @if (enviado) {
+        <div class="success-box">
+          <p>Gracias. Hemos recibido tu mensaje.</p>
+          <button type="button" class="btn" (click)="otroMensaje()">Enviar otro mensaje</button>
+        </div>
+      } @else {
+        @if (errorApi) {
+          <p class="api-error" role="alert">{{ errorApi }}</p>
         }
-      </div>
 
-      <button type="submit" class="btn primary" [disabled]="cargando">
-        @if (cargando) {
-          Enviando…
-        } @else {
-          Enviar mensaje
-        }
-      </button>
-    </form>
-  }
-</section>
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate class="contact-form">
+          <div class="field" [class.error]="invalido('nombre')">
+            <label for="c-nombre">Nombre</label>
+            <input id="c-nombre" type="text" formControlName="nombre" placeholder="Nombre y apellidos" />
+            @if (invalido('nombre')) {
+              <span class="err">Indica tu nombre</span>
+            }
+          </div>
+
+          <div class="field" [class.error]="invalido('email')">
+            <label for="c-email">Correo</label>
+            <input id="c-email" type="email" formControlName="email" placeholder="tu-correo@ejemplo.com" />
+            @if (invalido('email')) {
+              <span class="err">Correo no valido</span>
+            }
+          </div>
+
+          <div class="field" [class.error]="invalido('mensaje')">
+            <label for="c-msg">Mensaje</label>
+            <textarea id="c-msg" rows="6" formControlName="mensaje" placeholder="Escribe tu consulta, fecha de viaje o destino de interes"></textarea>
+            @if (invalido('mensaje')) {
+              <span class="err">Minimo 5 caracteres</span>
+            }
+          </div>
+
+          <button type="submit" class="btn primary" [disabled]="cargando">
+            @if (cargando) {
+              Enviando...
+            } @else {
+              Enviar mensaje
+            }
+          </button>
+        </form>
+      }
+    </section>
+  </section>
+
+</main>

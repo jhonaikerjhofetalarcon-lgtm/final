@@ -1,59 +1,28 @@
 @if (apiOk === true) {
-  <p class="api-banner ok">✅ Servidor conectado</p>
+  <p class="api-banner ok">Servidor conectado</p>
 }
 @if (apiOk === false) {
-  <p class="api-banner warn">⚠️ Sin conexión al backend</p>
+  <p class="api-banner warn">Sin conexion al backend</p>
 }
 
-<!-- HERO -->
 <div class="hero">
   <div class="hero-overlay"></div>
   <img class="hero-img" src="https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg" alt="G7 Travel">
   <div class="hero-content">
-    <span class="hero-badge">✦ Vive el Perú Auténtico</span>
+    <span class="hero-badge">Vive el Peru Autentico</span>
     <h1 class="hero-title">G7 TRAVEL</h1>
     <p class="hero-sub">Experiencias inolvidables desde Ayacucho</p>
     <a routerLink="/reservas" class="hero-cta">Reservar Ahora</a>
   </div>
+  <a href="/home#destinos" class="scroll-cue" aria-label="Ver destinos">
+    <span>Ver destinos</span>
+    <b></b>
+  </a>
 </div>
 
-<section class="filters-section">
-  <div class="filters-container">
-    <!-- Momento del día -->
-    <div class="filter-group">
-      <label>Momento del día</label>
-      <div class="checkbox-group">
-        <label><input type="checkbox" [(ngModel)]="filtro.manana"> Mañana</label>
-        <label><input type="checkbox" [(ngModel)]="filtro.tarde"> Tarde</label>
-        <label><input type="checkbox" [(ngModel)]="filtro.noche"> Noche</label>
-      </div>
-    </div>
-
-    <!-- Precio -->
-    <div class="filter-group">
-      <label>Precio (S/)</label>
-      <div class="price-range">
-        <input type="range" min="0" max="2000" [(ngModel)]="filtro.precioMax" (input)="filtrar()">
-        <span>S/ 0 - S/{{ filtro.precioMax }}</span>
-      </div>
-    </div>
-
-    <!-- Duración -->
-    <div class="filter-group">
-      <label>Duración</label>
-      <select [(ngModel)]="filtro.duracion" (ngModelChange)="filtrar()">
-        <option value="">Cualquier duración</option>
-        <option value="1">Hasta 1 día</option>
-        <option value="3">1 a 3 días</option>
-        <option value="7">Más de 3 días</option>
-      </select>
-    </div>
-  </div>
-</section>
-
-<section class="seccion-destinos">
+<section class="seccion-destinos" id="destinos">
   <div class="seccion-header">
-    <h2>{{ destinosFiltrados.length }} Experiencias en Ayacucho y Perú</h2>
+    <h2>{{ destinosFiltrados.length }} Experiencias en Ayacucho y Peru</h2>
   </div>
 
   <div class="grid-destinos">

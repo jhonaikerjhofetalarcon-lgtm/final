@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/Auth.guard';
+import { adminGuard, conductorGuard } from './core/Auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -8,6 +8,11 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login').then(m => m.Login),
+  },
+
+  {
+    path: 'conductor-login',
+    loadComponent: () => import('./pages/conductor-login/conductor-login').then(m => m.ConductorLogin),
   },
 
   {
@@ -41,6 +46,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'conductor',
+    loadComponent: () => import('./pages/conductor/conductor').then(m => m.Conductor),
+    canActivate: [conductorGuard],
+  },
+
+  {
     path: 'contacto',
     loadComponent: () => import('./pages/contacto/contacto').then(m => m.Contacto),
   },
@@ -54,7 +65,7 @@ export const routes: Routes = [
   {
     path: 'dash',
     loadComponent: () => import('./dash/dashboard/dashboard').then(m => m.Dashboard),
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
 
@@ -62,6 +73,12 @@ export const routes: Routes = [
         path: 'overview', 
         loadComponent: () => import('./dash/dashboard/dashboard').then(m => m.Dashboard) 
       }, // Reutilizamos el mismo componente para overview
+
+      {
+        path: 'dashboard',
+        redirectTo: 'overview',
+        pathMatch: 'full'
+      },
 
       { 
         path: 'usuarios', 

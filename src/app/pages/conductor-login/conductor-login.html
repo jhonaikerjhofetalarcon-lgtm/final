@@ -1,0 +1,48 @@
+<main class="driver-login">
+  <a routerLink="/home" class="back-link">Volver al inicio</a>
+
+  <section class="driver-panel">
+    <div class="brand-side">
+      <div class="brand-box">
+        <span>G7</span>
+        <h1>Acceso de conductor</h1>
+        <p>Ingresa para ver tu carro asignado y el manifiesto de pasajeros listo para imprimir.</p>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="login-card">
+        <div class="login-head">
+          <span class="badge">Conductor</span>
+          <h2>Iniciar sesion</h2>
+          <p>Solo usuarios con rol conductor pueden entrar aqui.</p>
+        </div>
+
+        @if (error) {
+        <div class="login-error">{{ error }}</div>
+        }
+
+        <div class="field">
+          <label>Correo electronico</label>
+          <input type="email" [(ngModel)]="email" placeholder="conductor@g7travel.com" autocomplete="email"
+            (keyup.enter)="submit()">
+        </div>
+
+        <div class="field">
+          <label>Contrasena</label>
+          <div class="pass-wrap">
+            <input [type]="showPass ? 'text' : 'password'" [(ngModel)]="password" placeholder="******"
+              autocomplete="current-password" (keyup.enter)="submit()">
+            <button type="button" (click)="togglePass()">{{ showPass ? 'Ocultar' : 'Ver' }}</button>
+          </div>
+        </div>
+
+        <button class="btn-login" (click)="submit()" [disabled]="cargando">
+          {{ cargando ? 'Verificando...' : 'Entrar al manifiesto' }}
+        </button>
+
+        <a routerLink="/login" class="admin-link">Entrar como administrador</a>
+      </div>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,107 @@
+<main class="driver-page">
+  <section class="driver-shell">
+    <header class="driver-header no-print">
+      <div>
+        <p class="eyebrow">Panel del conductor</p>
+        <h1>Bienvenido, {{ conductor()?.nombre }}</h1>
+        <p>Revisa tu carro asignado y el manifiesto de pasajeros listo para imprimir.</p>
+      </div>
+      <button class="btn-secondary" (click)="salir()">Cerrar sesion</button>
+    </header>
+
+    @if (cargando()) {
+    <div class="state-card">Cargando manifiesto...</div>
+    }
+
+    @if (!cargando() && error()) {
+    <div class="state-card error">{{ error() }}</div>
+    }
+
+    @if (!cargando() && auto()) {
+    <section class="vehicle-card no-print">
+      <div>
+        <span>Carro asignado</span>
+        <strong>{{ auto()?.marca }} {{ auto()?.modelo }}</strong>
+      </div>
+      <div>
+        <span>Placa</span>
+        <strong>{{ auto()?.placa }}</strong>
+      </div>
+      <div>
+        <span>Tipo</span>
+        <strong>{{ auto()?.tipo }}</strong>
+      </div>
+      <div>
+        <span>Pasajeros</span>
+        <strong>{{ pasajeros().length }} / {{ auto()?.cantidadAsiento }}</strong>
+      </div>
+    </section>
+
+    <section class="manifest-sheet">
+      <div class="manifest-top">
+        <div class="brand-mark">G7</div>
+        <div>
+          <h2>TURISMO G7 TRAVEL R&H SAC.</h2>
+          <p>RUC: 20614645165</p>
+          <p>ASOC. BOSQUE DE NAWINPUQUIO SAN JUAN BAUTISTA AYACUCHO HUAMANGA</p>
+          <p>Cel: 966 749075 - 980 398 544</p>
+        </div>
+        <div class="manifest-number">N 000208</div>
+      </div>
+
+      <div class="manifest-lines">
+        <div><span>CONDUCTOR:</span><strong>{{ conductor()?.nombre }}</strong></div>
+        <div><span>N LIC. DE CONDUCIR:</span><strong>{{ licenciaConductor() }}</strong></div>
+        <div><span>ORIGEN:</span><strong>{{ origenEmpresa }}</strong></div>
+        <div><span>DESTINO:</span><strong>{{ destinoPrincipal() }}</strong></div>
+        <div><span>MODALIDAD DE SERVICIO:</span><strong>Turismo</strong></div>
+        <div><span>FECHA DE VIAJE:</span><strong>{{ fechaViaje() | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>N DE PLACA:</span><strong>{{ auto()?.placa }}</strong></div>
+        <div><span>GUIA:</span><strong></strong></div>
+      </div>
+
+      <h3>MANIFIESTO DE USUARIOS</h3>
+
+      <table class="manifest-table">
+        <thead>
+          <tr>
+            <th>N</th>
+            <th>Asiento</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>DNI</th>
+            <th>Email</th>
+            <th>Telefono</th>
+            <th>Origen</th>
+            <th>Firma</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filasManifiesto(); track $index) {
+          <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ p?.numeroAsiento || '' }}</td>
+            <td>{{ p?.nombre || '' }}</td>
+            <td>{{ p?.apellido || '' }}</td>
+            <td>{{ p?.dni || '' }}</td>
+            <td>{{ p?.email || '' }}</td>
+            <td>{{ p?.telefono || '' }}</td>
+            <td>{{ p?.origen || '' }}</td>
+            <td></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="observaciones">
+        <strong>OBSERVACIONES</strong>
+        <div></div>
+      </div>
+    </section>
+
+    <div class="print-actions no-print">
+      <button class="btn-print" (click)="imprimir()">Imprimir manifiesto</button>
+    </div>
+    }
+  </section>
+</main>

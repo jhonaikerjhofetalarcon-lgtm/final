@@ -5,6 +5,14 @@
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(59,130,246,.12), transparent 34%),
+    linear-gradient(180deg, #ffffff, #f4f7fb);
+}
+
 /* Header del formulario */
 .form-header {
   text-align: center;
@@ -51,6 +59,7 @@
   margin-bottom: 25px;
   font-weight: 600;
   color: #1e3a8a;
+  box-shadow: 0 10px 24px rgba(15,23,42,.06);
 }
 
 .destino-select:focus {
@@ -69,6 +78,7 @@
   border-radius: 14px;
   background: #f8fbff;
   color: #334155;
+  box-shadow: 0 14px 28px rgba(15,23,42,.07);
 }
 
 .vehiculo-info div {
@@ -246,6 +256,12 @@
   font-weight: 600;
   margin-top: 15px;
   border-radius: 12px;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.btn-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(30,64,175,.18);
 }
 
 /* Modal */

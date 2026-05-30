@@ -71,6 +71,15 @@
   background: #0b7568;
 }
 
+.inline-alert {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #b42318;
+  font-weight: 800;
+}
+
 .admin-reserva-card {
   padding: 20px;
   border: 1px solid #e2e9ee;
@@ -338,7 +347,7 @@
 
 .data-table {
   width: 100%;
-  min-width: 840px;
+  min-width: 980px;
   border-collapse: collapse;
 }
 
@@ -364,6 +373,10 @@
 
 .data-table tbody tr:hover td {
   background: #f8fbff;
+}
+
+.data-table tbody tr.payment-row:hover td {
+  background: #ffffff;
 }
 
 .data-table tbody tr:last-child td {
@@ -402,6 +415,68 @@
 .btn-small:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.payment-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #cfe0ea;
+  border-radius: 8px;
+  background: #f8fbfc;
+}
+
+.payment-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #102332;
+}
+
+.payment-title span {
+  color: #687989;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payment-grid label {
+  display: grid;
+  gap: 7px;
+  color: #405263;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.payment-grid input,
+.payment-grid select {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid #d7e1e8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17212b;
+  font: inherit;
+  outline: none;
+}
+
+.payment-grid input:focus,
+.payment-grid select:focus {
+  border-color: #0d8f7d;
+  box-shadow: 0 0 0 4px rgba(13, 143, 125, 0.12);
+}
+
+.payment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .btn-save-pay,
@@ -472,12 +547,15 @@
   }
 
   .admin-form-head,
-  .admin-form-actions {
+  .admin-form-actions,
+  .payment-title,
+  .payment-actions {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .admin-reserva-grid {
+  .admin-reserva-grid,
+  .payment-grid {
     grid-template-columns: 1fr;
   }
 
@@ -486,8 +564,9 @@
   }
 }
 
-@media (max-width: 1100px) {
-  .admin-reserva-grid {
+@media (min-width: 761px) and (max-width: 1100px) {
+  .admin-reserva-grid,
+  .payment-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

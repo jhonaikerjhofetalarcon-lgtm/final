@@ -94,6 +94,50 @@
   transform: translateY(-3px);
 }
 
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  z-index: 3;
+  display: inline-grid;
+  justify-items: center;
+  gap: 9px;
+  color: rgba(255,255,255,.86);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.scroll-cue b {
+  width: 30px;
+  height: 46px;
+  border: 2px solid rgba(255,255,255,.7);
+  border-radius: 999px;
+  position: relative;
+}
+
+.scroll-cue b::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 9px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: translateX(-50%) rotate(45deg);
+  animation: cueDown 1.25s ease-in-out infinite;
+}
+
+@keyframes cueDown {
+  0% { opacity: 0; top: 8px; }
+  45% { opacity: 1; }
+  100% { opacity: 0; top: 25px; }
+}
+
 /* ==================== FILTROS (Sidebar) ==================== */
 .filters-section {
   background: #fff;
@@ -140,8 +184,11 @@
 
 /* ==================== TARJETAS DE DESTINOS ==================== */
 .seccion-destinos {
-  padding: 60px 40px;
-  background: #f8f9fa;
+  padding: 76px 40px;
+  background:
+    radial-gradient(circle at top left, rgba(192,57,43,.08), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+  scroll-margin-top: 84px;
 }
 
 .seccion-header h2 {
@@ -161,7 +208,7 @@
 
 .card-destino {
   background: white;
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
   transition: all 0.4s ease;
@@ -225,8 +272,14 @@
 
 .btn-ver {
   color: #c0392b;
-  font-weight: 500;
+  font-weight: 800;
   text-decoration: none;
+  transition: color .2s ease, transform .2s ease;
+}
+
+.btn-ver:hover {
+  color: #8f241c;
+  transform: translateY(-1px);
 }
 
 .card-actions {

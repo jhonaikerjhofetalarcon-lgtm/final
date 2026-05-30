@@ -1,25 +1,34 @@
 <div class="login-root">
+
     <a routerLink="/home" class="back-home" aria-label="Volver al inicio">
         <span>←</span> Volver al menú
     </a>
 
-    <!-- Panel izquierdo — imagen/marca -->
     <div class="login-brand">
         <div class="brand-overlay"></div>
+
         <div class="brand-content">
             <div class="brand-logo">G7</div>
-            <h1 class="brand-title">G7 Travel</h1>
-            <p class="brand-sub">R&H S.A.C — Ayacucho, Perú</p>
+
+            <h1 class="brand-title">
+                G7 Travel
+            </h1>
+
+            <p class="brand-sub">
+                R&H S.A.C — Ayacucho, Perú
+            </p>
+
             <div class="brand-features">
-                &#10003; Gestión de tours y destinos<br>
-                &#10003; Control de reservas<br>
-                &#10003; Administración de vehículos<br>
-                &#10003; Panel administrativo completo 
+                ✓ Gestión de tours y destinos<br>
+                ✓ Control de reservas<br>
+                ✓ Administración de vehículos<br>
+                ✓ Panel administrativo completo
             </div>
         </div>
     </div>
 
     <div class="login-form-side">
+
         <div class="login-card">
 
             <div class="login-logo-mobile">
@@ -34,50 +43,81 @@
 
             @if (error) {
             <div class="login-error">
-                <span>⚠</span> {{ error }}
+                <span>⚠</span>
+                {{ error }}
             </div>
             }
 
             <div class="login-fields">
 
                 <div class="field-group">
-                    <label for="email">Correo electrónico</label>
+                    <label for="email">
+                        Correo electrónico
+                    </label>
+
                     <div class="field-wrap">
                         <span class="field-icon">✉</span>
-                        <input id="email" type="email" [(ngModel)]="email" placeholder="ejem@gmail.com"
-                            (keyup.enter)="submit()" autocomplete="email">
+
+                        <input
+                            id="email"
+                            type="email"
+                            [(ngModel)]="email"
+                            placeholder="ejemplo@g7travel.com"
+                            autocomplete="email"
+                            (keyup.enter)="submit()">
                     </div>
                 </div>
 
                 <div class="field-group">
-                    <label for="password">Contraseña</label>
+                    <label for="password">
+                        Contraseña
+                    </label>
+
                     <div class="field-wrap">
                         <span class="field-icon">🔒</span>
-                        <input id="password" [type]="showPass ? 'text' : 'password'" [(ngModel)]="password"
-                            placeholder="••••••" (keyup.enter)="submit()" autocomplete="current-password">
-                        <button class="toggle-pass" type="button" (click)="togglePass()"
-                            [title]="showPass ? 'Ocultar' : 'Mostrar'">
+
+                        <input
+                            id="password"
+                            [type]="showPass ? 'text' : 'password'"
+                            [(ngModel)]="password"
+                            placeholder="••••••"
+                            autocomplete="current-password"
+                            (keyup.enter)="submit()">
+
+                        <button
+                            type="button"
+                            class="toggle-pass"
+                            (click)="togglePass()">
+
                             {{ showPass ? '🙈' : '👁' }}
+
                         </button>
                     </div>
                 </div>
 
-                <button class="btn-login" (click)="submit()" [disabled]="cargando">
-                    @if (cargando) {
-                    <span class="spinner-sm"></span> Verificando…
-                    } @else {
-                    Ingresar al sistema →
-                    }
+                <button
+                    class="btn-login"
+                    (click)="submit()"
+                    [disabled]="cargando">
+
+                    {{ cargando ? 'Verificando...' : 'Ingresar al sistema' }}
+
                 </button>
 
             </div>
 
             <div class="login-footer">
-                <p>Solo los administradores pueden acceder al panel.</p>
-                <p>¿Problemas? Contacta al administrador del sistema.</p>
+                <p>
+                    El sistema detectará automáticamente si eres administrador o conductor.
+                </p>
+
+                <p>
+                    ¿Problemas para ingresar? Contacta al administrador del sistema.
+                </p>
             </div>
 
         </div>
+
     </div>
 
 </div>

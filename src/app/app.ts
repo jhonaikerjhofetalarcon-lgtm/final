@@ -21,14 +21,16 @@ export class AppComponent implements OnInit {
   isAdminRoute = false;
 
   get isLoggedIn(): boolean { return this.auth.isLoggedIn; }
+  get isAdmin(): boolean { return this.auth.isAdmin; }
+  get isConductor(): boolean { return this.auth.isConductor; }
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: any) => {
       const url: string = e.urlAfterRedirects ?? e.url;
-      this.isLoginRoute = url.includes('/login');
-      this.isAdminRoute = url.startsWith('/dash');
+      this.isLoginRoute = url.includes('/login') || url.includes('/conductor-login');
+      this.isAdminRoute = url.startsWith('/dash') || url.startsWith('/conductor');
       this.menuOpen = false;
     });
   }

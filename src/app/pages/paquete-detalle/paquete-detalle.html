@@ -35,5 +35,24 @@
         <a [routerLink]="['/reservas']" [queryParams]="{ paqueteId: p.id }" class="btn-primary inline">Ir al formulario de reserva</a>
       </div>
     </section>
+
+    <section class="lodging-section">
+      <div class="lodging-copy">
+        <span>Hospedaje incluido</span>
+        <h2>{{ hospedajePlatero.nombre }}</h2>
+        <p>{{ hospedajePlatero.descripcion }} Habitaciones comodas para descansar durante el recorrido del paquete.</p>
+        <ul>
+          <li><strong>Hospedaje:</strong> {{ hospedajePlatero.nombre }}</li>
+          <li><strong>Ubicacion:</strong> {{ hospedajePlatero.ubicacion }}</li>
+          <li><strong>Aplica para:</strong> Todos los paquetes publicados</li>
+        </ul>
+      </div>
+
+      <div class="lodging-gallery">
+        @for (img of hospedajePlatero.imagenes; track img) {
+          <img [src]="img" [alt]="'Hospedaje ' + hospedajePlatero.nombre">
+        }
+      </div>
+    </section>
   </main>
 }

@@ -39,6 +39,18 @@
               <h3>{{ p.titulo }}</h3>
               <p>{{ p.descripcion || 'Paquete turistico disponible para reservar.' }}</p>
 
+              <div class="lodging-preview">
+                <div>
+                  <span>Hospedaje incluido</span>
+                  <strong>{{ hospedajePlatero.nombre }}</strong>
+                </div>
+                <div class="lodging-thumbs">
+                  @for (img of hospedajePlatero.imagenes; track img) {
+                    <img [src]="img" [alt]="'Hospedaje ' + hospedajePlatero.nombre">
+                  }
+                </div>
+              </div>
+
               <div class="card-footer">
                 <div class="price">
                   @if (p.oferta) {

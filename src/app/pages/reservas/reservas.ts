@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { G7ApiService, AsientoDto, ReservaCreatePayload, DestinoDto, AutoDto, PaqueteDto } from '../../core/g7-api.service';
+import { G7ApiService, AsientoDto, DestinoDto, AutoDto, PaqueteDto } from '../../core/g7-api.service';
 import { firstValueFrom } from 'rxjs';
 
 interface Pasajero {
@@ -11,7 +11,7 @@ interface Pasajero {
   dni: number;
   email: string;
   telefono: string;
-  origen: string;           // ← NUEVO
+  origen: string;
 }
 
 type AsientoSlot = AsientoDto | null;
@@ -31,6 +31,7 @@ export class Reservas implements OnInit {
   destinoSeleccionado: DestinoDto | null = null;
   paqueteSeleccionado: PaqueteDto | null = null;
   autoSeleccionado: AutoDto | null = null;
+  autosDisponibles: AutoDto[] = [];
 
   asientos: AsientoDto[] = [];
   asientosCroquis: AsientoSlot[][] = [];
@@ -45,8 +46,7 @@ export class Reservas implements OnInit {
   errorApi: string | null = null;
   reservasConfirmadas = 0;
   fechaSalida = '2026-06-15';
-
-  numeroPersonas: number = 0;
+  numeroPersonas = 0;
 
   ngOnInit() {
     this.cargarDestinos();
@@ -56,10 +56,14 @@ export class Reservas implements OnInit {
   cargarDestinos() {
     this.api.getDestinos().subscribe({
       next: (data) => {
-        this.destinos = data;
+        this.destinos = data?.length ? data : this.getDestinosRespaldo();
         this.preseleccionarDestino();
       },
-      error: () => this.errorApi = 'Error al cargar destinos'
+      error: () => {
+        this.destinos = this.getDestinosRespaldo();
+        this.errorApi = 'Backend no disponible. Mostrando destinos de respaldo.';
+        this.preseleccionarDestino();
+      }
     });
   }
 
@@ -86,14 +90,29 @@ export class Reservas implements OnInit {
   onDestinoChange() {
     this.numeroPersonas = 0;
     this.autoSeleccionado = null;
+    this.autosDisponibles = [];
     this.asientosSeleccionados = [];
+    this.asientos = [];
     this.asientosCroquis = [];
     this.copiloto = null;
+    this.cargarCarrosDisponibles();
   }
 
-  asignarVehiculoSegunPersonas() {
-    if (!this.destinoSeleccionado || this.numeroPersonas <= 0) {
+  onNumeroPersonasChange() {
+    this.asientosSeleccionados.forEach(a => a.estado = 'libre');
+    this.asientosSeleccionados = [];
+  }
+
+  totalPersonasReserva(): number {
+    return Number(this.numeroPersonas) > 0
+      ? Number(this.numeroPersonas)
+      : this.asientosSeleccionados.length;
+  }
+
+  cargarCarrosDisponibles() {
+    if (!this.destinoSeleccionado) {
       this.autoSeleccionado = null;
+      this.autosDisponibles = [];
       this.asientosCroquis = [];
       this.copiloto = null;
       return;
@@ -104,31 +123,46 @@ export class Reservas implements OnInit {
 
     this.api.getAutos().subscribe({
       next: (autos) => {
-        let autoFiltrado: AutoDto | null = null;
+        const idsDestino = this.destinoSeleccionado?.idAutos || [];
+        this.autosDisponibles = autos
+          .filter(a => !idsDestino.length || idsDestino.includes(a.id))
+          .filter(a => this.esCarroPermitido(a))
+          .sort((a, b) => (a.cantidadAsiento || 0) - (b.cantidadAsiento || 0));
 
-        if (this.numeroPersonas <= 4) {
-          autoFiltrado = autos.find(a => 
-            (a.marca?.toLowerCase() || '').includes('toyota') && (a.cantidadAsiento || 0) <= 5
-          ) || autos.find(a => (a.cantidadAsiento || 0) <= 5) || null;
-        } else {
-          autoFiltrado = autos.find(a => {
-            const tipo = (a.tipo?.toLowerCase() || '');
-            const modelo = (a.modelo?.toLowerCase() || '');
-            return ['minivan', 'combi', 'hiace', 'master'].some(t => tipo.includes(t) || modelo.includes(t));
-          }) || autos.find(a => (a.cantidadAsiento || 0) >= 10) || null;
-        }
-
-        this.autoSeleccionado = autoFiltrado;
-
-        if (this.autoSeleccionado) {
-          this.cargarAsientosDelVehiculo(this.autoSeleccionado);
-        } else {
-          this.errorApi = 'No se encontró vehículo disponible para esa cantidad de personas.';
+        if (!this.autosDisponibles.length) {
+          this.errorApi = 'No hay carros disponibles para este destino.';
         }
       },
-      error: () => this.errorApi = 'Error al cargar vehículos',
+      error: () => this.errorApi = 'Error al cargar carros disponibles',
       complete: () => this.cargando = false
     });
+  }
+
+  seleccionarCarro() {
+    this.asientosSeleccionados.forEach(a => a.estado = 'libre');
+    this.asientosSeleccionados = [];
+    this.asientos = [];
+    this.asientosCroquis = [];
+    this.copiloto = null;
+
+    if (this.autoSeleccionado) {
+      this.cargarAsientosDelVehiculo(this.autoSeleccionado);
+    }
+  }
+
+  private esCarroPermitido(auto: AutoDto): boolean {
+    const texto = `${auto.marca || ''} ${auto.modelo || ''} ${auto.tipo || ''}`.toLowerCase();
+    const asientos = Number(auto.cantidadAsiento) || 0;
+
+    return (
+      (texto.includes('renault') && texto.includes('master')) ||
+      texto.includes('sprinter') ||
+      texto.includes('microbus') ||
+      texto.includes('micro bus') ||
+      asientos === 15 ||
+      asientos === 18 ||
+      asientos === 25
+    );
   }
 
   private cargarAsientosDelVehiculo(auto: AutoDto) {
@@ -139,13 +173,14 @@ export class Reservas implements OnInit {
         const asientosBackend = todosAsientos.filter(a => a.idAuto === auto.id);
         this.asientos = this.completarAsientosVehiculo(asientosBackend, auto);
 
-        this.copiloto = this.asientos.find(a => 
+        this.copiloto = this.asientos.find(a =>
           a?.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a?.numeroAsiento || '')
         ) || null;
 
         const restantes = this.asientos.filter(a => a.id !== this.copiloto?.id);
         this.asientosCroquis = this.crearCroquis(restantes, auto);
-      }
+      },
+      error: () => this.errorApi = 'Error al cargar asientos'
     });
   }
 
@@ -155,7 +190,7 @@ export class Reservas implements OnInit {
     const total = Number(auto.cantidadAsiento) || 15;
     const mapa = new Map(asientosBackend.map(a => [this.normalizarNumero(a.numeroAsiento), a]));
 
-    return Array.from({length: total}, (_, i) => {
+    return Array.from({ length: total }, (_, i) => {
       const num = String(i + 1);
       return mapa.get(num) ?? {
         id: `virtual-${auto.id}-${num}`,
@@ -169,9 +204,10 @@ export class Reservas implements OnInit {
 
   private crearCroquis(asientos: AsientoDto[], auto: AutoDto | null): AsientoSlot[][] {
     const tipo = ((auto?.tipo || '') + ' ' + (auto?.marca || '') + ' ' + (auto?.modelo || '')).toLowerCase();
-    if (tipo.includes('minivan') || tipo.includes('master') || tipo.includes('hiace')) {
+    if (tipo.includes('master') || Number(auto?.cantidadAsiento) === 15) {
       return this.crearCroquisMinivan15(asientos);
     }
+
     const ordenados = this.ordenarAsientos(asientos);
     const filas: AsientoSlot[][] = [];
     for (let i = 0; i < ordenados.length; i += 4) {
@@ -201,19 +237,29 @@ export class Reservas implements OnInit {
   }
 
   toggleAsiento(asiento: AsientoDto) {
-    if (asiento.estado !== 'libre') return;
     const idx = this.asientosSeleccionados.findIndex(a => a.id === asiento.id);
+    const limite = Number(this.numeroPersonas) || 0;
+
     if (idx >= 0) {
       this.asientosSeleccionados.splice(idx, 1);
       asiento.estado = 'libre';
+      return;
+    }
+
+    if (asiento.estado !== 'libre') {
+      return;
     } else {
+      if (limite > 0 && this.asientosSeleccionados.length >= limite) return;
       this.asientosSeleccionados.push(asiento);
       asiento.estado = 'reservado';
     }
   }
 
   abrirFormularioPasajeros() {
-    if (this.asientosSeleccionados.length === 0) return;
+    const totalPersonas = this.totalPersonasReserva();
+    if (this.asientosSeleccionados.length === 0 || this.asientosSeleccionados.length !== totalPersonas) return;
+
+    this.numeroPersonas = totalPersonas;
     this.pasajeros = this.asientosSeleccionados.map(() => ({
       nombre: '', apellido: '', dni: 0, email: '', telefono: '', origen: ''
     }));
@@ -238,10 +284,10 @@ export class Reservas implements OnInit {
         const asiento = this.asientosSeleccionados[i];
 
         const asientoBackend = asiento.id.startsWith('virtual-')
-          ? await firstValueFrom(this.api.createAsiento({ 
-              idAuto: asiento.idAuto, 
-              numeroAsiento: asiento.numeroAsiento, 
-              estado: 'libre' 
+          ? await firstValueFrom(this.api.createAsiento({
+              idAuto: asiento.idAuto,
+              numeroAsiento: asiento.numeroAsiento,
+              estado: 'libre'
             }))
           : asiento;
 
@@ -250,13 +296,13 @@ export class Reservas implements OnInit {
           apellido: p.apellido,
           email: p.email,
           telefono: p.telefono,
-          origen: p.origen,                    // ← NUEVO
+          origen: p.origen,
           destino: this.destinoSeleccionado.title || '',
           fechaIda: this.fechaSalida,
           fechaVuelta: this.fechaSalida,
           dni: p.dni,
           idAsiento: asientoBackend.id,
-          notas: `Asiento ${asiento.numeroAsiento}`
+          notas: `Asiento ${asiento.numeroAsiento} - ${this.autoSeleccionado?.marca || ''} ${this.autoSeleccionado?.modelo || ''}`.trim()
         };
 
         const reserva = await firstValueFrom(this.api.createReserva(payload));
@@ -283,7 +329,56 @@ export class Reservas implements OnInit {
     this.mostrarModal = false;
     this.destinoSeleccionado = null;
     this.autoSeleccionado = null;
+    this.autosDisponibles = [];
+    this.asientos = [];
+    this.asientosCroquis = [];
+    this.copiloto = null;
     this.numeroPersonas = 0;
     this.errorApi = null;
+  }
+
+  private getDestinosRespaldo(): DestinoDto[] {
+    return [
+      {
+        id: 'respaldo-millpu',
+        label: 'Full Day',
+        title: 'Aguas Turquesas de Millpu',
+        desc: 'Ruta natural desde Ayacucho hacia piscinas turquesas. Full day desde S/. 110 por persona.',
+        name: 'Desde S/. 110',
+        bg: 'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
+        thumb: 'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
+        idAutos: []
+      },
+      {
+        id: 'respaldo-city-tour',
+        label: 'Half Day',
+        title: 'Ayacucho City Tour',
+        desc: 'Recorrido por plazas, templos, miradores y casonas historicas. Desde S/. 50 por persona.',
+        name: 'Desde S/. 50',
+        bg: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
+        thumb: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
+        idAutos: []
+      },
+      {
+        id: 'respaldo-quinua',
+        label: 'Historico',
+        title: 'Pampa de Quinua',
+        desc: 'Visita historica a Quinua y la Pampa de Ayacucho. Half day desde S/. 65 por persona.',
+        name: 'Desde S/. 65',
+        bg: 'https://www.ytuqueplanes.com/imagenes/fotos/novedades/sierra-pampa-quinua.JPG',
+        thumb: 'https://www.ytuqueplanes.com/imagenes/fotos/novedades/sierra-pampa-quinua.JPG',
+        idAutos: []
+      },
+      {
+        id: 'respaldo-vilcashuaman',
+        label: 'Full Day',
+        title: 'Vilcashuaman',
+        desc: 'Ruta arqueologica al templo del Sol y la Luna. Full day desde S/. 90 por persona.',
+        name: 'Desde S/. 90',
+        bg: 'https://images.pexels.com/photos/2929906/pexels-photo-2929906.jpeg',
+        thumb: 'https://images.pexels.com/photos/2929906/pexels-photo-2929906.jpeg',
+        idAutos: []
+      }
+    ];
   }
 }

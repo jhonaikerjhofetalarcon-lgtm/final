@@ -115,6 +115,12 @@ body {
     font-size: 13px;
     font-weight: 700;
     text-decoration: none;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-detail:hover,
+.btn-reserve:hover {
+    transform: translateY(-2px);
 }
 
 .btn-detail {
@@ -125,6 +131,7 @@ body {
 .btn-reserve {
     background: #c0392b;
     color: #fff;
+    box-shadow: 0 12px 22px rgba(192,57,43,.24);
 }
 
 .slide-status {
@@ -228,6 +235,7 @@ body {
     border: 2px solid transparent;
     transition: border-color 0.3s, transform 0.3s, height 0.3s;
     flex-shrink: 0;
+    box-shadow: 0 10px 20px rgba(0,0,0,.24);
 }
 
 .thumb.active {

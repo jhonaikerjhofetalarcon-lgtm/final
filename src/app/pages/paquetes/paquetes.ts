@@ -18,6 +18,16 @@ interface PaquetePublicado extends PaqueteDto {
 export class PaquetesPublicos implements OnInit {
   private readonly api = inject(G7ApiService);
 
+  readonly hospedajePlatero = {
+    nombre: 'PLATERO',
+    descripcion: 'Hospedaje incluido para todos los paquetes.',
+    imagenes: [
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg',
+      'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg',
+      'https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg',
+    ],
+  };
+
   paquetes = signal<PaqueteDto[]>([]);
   ofertas = signal<OfertaDto[]>([]);
   cargando = signal(true);
@@ -25,7 +35,7 @@ export class PaquetesPublicos implements OnInit {
 
   paquetesPublicados = computed<PaquetePublicado[]>(() => {
     return this.paquetes()
-      .filter(paquete => paquete.estado)
+      .filter(paquete => paquete.estado !== false)
       .map(paquete => {
         const oferta = this.ofertas().find(o => o.estado && o.paqueteId === paquete.id);
         const precioBase = Number(paquete.presio) || 0;

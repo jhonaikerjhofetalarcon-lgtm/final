@@ -5,8 +5,8 @@
 
   @if (enviado) {
   <div class="success-card">
-    <div class="success-icon">✅</div>
-    <h2>¡Reserva Confirmada!</h2>
+    <div class="success-icon">OK</div>
+    <h2>Reserva Confirmada</h2>
     <p>Se registraron <strong>{{ reservasConfirmadas }}</strong> asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
     <button class="btn-primary" (click)="nuevaReserva()">Hacer otra reserva</button>
   </div>
@@ -18,13 +18,11 @@
       <h1>Reserva tu Viaje</h1>
     </div>
 
-    <!-- Fecha de salida -->
     <div class="form-group">
       <label>Fecha de Salida</label>
       <input class="destino-select" type="date" [(ngModel)]="fechaSalida" />
     </div>
 
-    <!-- Destino -->
     <div class="form-group">
       <label>Destino</label>
       <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
@@ -35,32 +33,40 @@
       </select>
     </div>
 
-    <!-- Cantidad de personas -->
     @if (destinoSeleccionado) {
     <div class="form-group">
-      <label><strong>¿Cuántas personas van?</strong></label>
-      <input type="number" [(ngModel)]="numeroPersonas" (ngModelChange)="asignarVehiculoSegunPersonas()"
-        class="destino-select" min="1" max="15" placeholder="Ejemplo: 4" />
+      <label><strong>Cuantas personas van?</strong></label>
+      <input type="number" [(ngModel)]="numeroPersonas" (ngModelChange)="onNumeroPersonasChange()"
+        class="destino-select" min="1" max="25" placeholder="Ejemplo: 4" />
+    </div>
+
+    <div class="form-group">
+      <label>Carros disponibles</label>
+      <select [(ngModel)]="autoSeleccionado" (ngModelChange)="seleccionarCarro()" class="destino-select">
+        <option [ngValue]="null">Selecciona el carro para tu viaje</option>
+        @for (a of autosDisponibles; track a.id) {
+        <option [ngValue]="a">
+          {{ a.marca }} {{ a.modelo }} - {{ a.cantidadAsiento }} pasajeros - {{ a.placa }}
+        </option>
+        }
+      </select>
     </div>
     }
 
-    <!-- Vehículo -->
     @if (destinoSeleccionado && autoSeleccionado) {
     <div class="vehiculo-info">
-      <h3>Vehículo Asignado:</h3>
+      <h3>Carro elegido</h3>
       <div><strong>{{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</strong></div>
       <div>Placa: {{ autoSeleccionado.placa }}</div>
-      <div>Tipo: {{ autoSeleccionado.tipo }} · {{ autoSeleccionado.cantidadAsiento }} asientos</div>
+      <div>Tipo: {{ autoSeleccionado.tipo }} - {{ autoSeleccionado.cantidadAsiento }} pasajeros</div>
       <div>Conductor: {{ autoSeleccionado.conductor || 'No asignado' }}</div>
     </div>
 
-    <!-- Asientos -->
     <div class="seat-section">
       <h3>Asientos disponibles</h3>
 
-      <div class="bus-container" 
-        [class.minivan]="(autoSeleccionado.tipo?.toLowerCase() || '').includes('minivan') || 
-                        (autoSeleccionado.modelo?.toLowerCase() || '').includes('master')">
+      <div class="bus-container"
+        [class.minivan]="(autoSeleccionado.modelo.toLowerCase() || '').includes('master') || autoSeleccionado.cantidadAsiento === 15">
 
         <div class="vehicle-label">
           {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }} {{ autoSeleccionado.anioFabrica }}
@@ -69,9 +75,9 @@
         <div class="front-row">
           <div class="conductor-box">Conductor</div>
           @if (copiloto) {
-          <div class="asiento copiloto" 
+          <div class="asiento copiloto"
             [class.ocupado]="copiloto.estado !== 'libre'"
-            [class.seleccionado]="copiloto.estado === 'reservado'" 
+            [class.seleccionado]="copiloto.estado === 'reservado'"
             (click)="toggleAsiento(copiloto)">
             {{ copiloto.numeroAsiento }}
           </div>
@@ -83,9 +89,9 @@
           <div class="fila croquis-row">
             @for (asiento of fila; track $index) {
             @if (asiento) {
-            <div class="asiento" 
+            <div class="asiento"
               [class.ocupado]="asiento.estado !== 'libre'"
-              [class.seleccionado]="asiento.estado === 'reservado'" 
+              [class.seleccionado]="asiento.estado === 'reservado'"
               (click)="toggleAsiento(asiento)">
               {{ asiento.numeroAsiento }}
             </div>
@@ -106,16 +112,15 @@
     </div>
 
     <button class="btn-primary btn-large"
-      [disabled]="asientosSeleccionados.length === 0 || cargando"
+      [disabled]="asientosSeleccionados.length === 0 || asientosSeleccionados.length !== totalPersonasReserva() || cargando"
       (click)="abrirFormularioPasajeros()">
-      Continuar con {{ asientosSeleccionados.length }} asiento(s)
+      Continuar con {{ asientosSeleccionados.length }} de {{ totalPersonasReserva() }} asiento(s)
     </button>
     }
   </div>
   }
 </div>
 
-<!-- Modal Pasajeros -->
 @if (mostrarModal) {
 <div class="modal-overlay">
   <div class="modal modal-form">
@@ -129,7 +134,7 @@
         <input [(ngModel)]="pasajeros[i].apellido" placeholder="Apellido *" required />
         <input type="number" [(ngModel)]="pasajeros[i].dni" placeholder="DNI *" required />
         <input type="email" [(ngModel)]="pasajeros[i].email" placeholder="Email *" />
-        <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Teléfono *" />
+        <input type="tel" [(ngModel)]="pasajeros[i].telefono" placeholder="Telefono *" />
         <input [(ngModel)]="pasajeros[i].origen" placeholder="Lugar de Origen (Ciudad)" />
       </div>
     </div>

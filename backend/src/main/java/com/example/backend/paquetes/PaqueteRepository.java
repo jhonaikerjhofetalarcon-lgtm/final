@@ -56,7 +56,8 @@ public class PaqueteRepository {
     e.setPresio(d.getLong("presio"));
     e.setId_paquete(d.getString("id_paquete"));
     e.setImagenes(d.getString("imagenes"));
-    e.setEstado(Boolean.TRUE.equals(d.getBoolean("estado")));
+    Boolean estado = d.getBoolean("estado");
+    e.setEstado(estado == null ? true : Boolean.TRUE.equals(estado));
     return e;
   }
 }
