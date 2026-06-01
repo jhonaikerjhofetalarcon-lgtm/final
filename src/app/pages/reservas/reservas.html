@@ -20,7 +20,7 @@
 
     <div class="form-group">
       <label>Fecha de Salida</label>
-      <input class="destino-select" type="date" [(ngModel)]="fechaSalida" />
+      <input class="destino-select" type="date" [(ngModel)]="fechaSalida" (ngModelChange)="onFechaSalidaChange()" />
     </div>
 
     <div class="form-group">
@@ -33,27 +33,7 @@
       </select>
     </div>
 
-    @if (destinoSeleccionado) {
-    <div class="form-group">
-      <label><strong>Cuantas personas van?</strong></label>
-      <input type="number" [(ngModel)]="numeroPersonas" (ngModelChange)="onNumeroPersonasChange()"
-        class="destino-select" min="1" max="25" placeholder="Ejemplo: 4" />
-    </div>
-
-    <div class="form-group">
-      <label>Carros disponibles</label>
-      <select [(ngModel)]="autoSeleccionado" (ngModelChange)="seleccionarCarro()" class="destino-select">
-        <option [ngValue]="null">Selecciona el carro para tu viaje</option>
-        @for (a of autosDisponibles; track a.id) {
-        <option [ngValue]="a">
-          {{ a.marca }} {{ a.modelo }} - {{ a.cantidadAsiento }} pasajeros - {{ a.placa }}
-        </option>
-        }
-      </select>
-    </div>
-    }
-
-    @if (destinoSeleccionado && autoSeleccionado) {
+    @if (destinoSeleccionado && autosDisponibles.length > 0) {
     <div class="vehiculo-info">
       <h3>Carro elegido</h3>
       <div><strong>{{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</strong></div>
@@ -112,9 +92,9 @@
     </div>
 
     <button class="btn-primary btn-large"
-      [disabled]="asientosSeleccionados.length === 0 || asientosSeleccionados.length !== totalPersonasReserva() || cargando"
+      [disabled]="asientosSeleccionados.length === 0 || cargando"
       (click)="abrirFormularioPasajeros()">
-      Continuar con {{ asientosSeleccionados.length }} de {{ totalPersonasReserva() }} asiento(s)
+      Continuar con {{ asientosSeleccionados.length }} asiento(s)
     </button>
     }
   </div>

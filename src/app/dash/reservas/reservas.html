@@ -42,7 +42,7 @@
         </select>
       </label>
 
-      <label>Fecha Ida * <input type="date" [(ngModel)]="reservaForm.fechaIda"></label>
+      <label>Fecha Ida * <input type="date" [(ngModel)]="reservaForm.fechaIda" (ngModelChange)="onFechaAdminChange()"></label>
       <label>Fecha Vuelta <input type="date" [(ngModel)]="reservaForm.fechaVuelta"></label>
 
       <label>
@@ -67,7 +67,7 @@
       <div class="seat-map-admin">
         <div class="seat-map-title">🪑 Selecciona Asiento</div>
 
-        @if (!reservaForm.idAutos?.length) {
+        @if (!reservaForm.idAutos.length) {
         <p class="info-text">Selecciona un vehículo para ver los asientos.</p>
         } @else {
         <div class="vehicle-map-admin">

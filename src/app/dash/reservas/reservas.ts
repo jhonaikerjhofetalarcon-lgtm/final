@@ -120,8 +120,48 @@ export class Reservas implements OnInit {
     return this.asientosFormulario.find(a => a.id === this.reservaForm.idAsiento);
   }
 
+  private asientoReservadoEnFecha(asiento: AsientoDto, fechaIda: string): boolean {
+    if (!fechaIda) return false;
+    const fechaSeleccionada = String(fechaIda).slice(0, 10);
+    return this.reservas.some(r =>
+      String(r.fechaIda || '').slice(0, 10) === fechaSeleccionada && r.idAsiento === asiento.id
+    );
+  }
+
+  private marcarAsientosReservadosPorFecha(asientos: AsientoDto[], fechaIda: string): AsientoDto[] {
+    return asientos.map(asiento => {
+      if (this.asientoReservadoEnFecha(asiento, fechaIda)) {
+        return { ...asiento, estado: 'reservado' };
+      }
+      return { ...asiento, estado: asiento.estado === 'ocupado' ? 'ocupado' : 'libre' };
+    });
+  }
+
   asientoDisponibleParaFecha(asiento: AsientoDto): boolean {
-    return asiento.id === this.reservaForm.idAsiento || asiento.estado === 'libre';
+    if (asiento.id === this.reservaForm.idAsiento) return true;
+    if (asiento.estado === 'ocupado') return false;
+    return !this.asientoReservadoEnFecha(asiento, this.reservaForm.fechaIda || '');
+  }
+
+  onFechaAdminChange() {
+    const auto = this.autoSeleccionadoAdmin();
+    if (this.asientosFormulario.length && this.reservaForm.fechaIda) {
+      this.asientosFormulario = this.marcarAsientosReservadosPorFecha(this.asientosFormulario, this.reservaForm.fechaIda);
+      this.copilotoFormulario = this.asientosFormulario.find(a =>
+        a.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a.numeroAsiento || '')
+      ) || null;
+      if (auto) {
+        const restantes = this.asientosFormulario.filter(a => a.id !== this.copilotoFormulario?.id);
+        this.asientosCroquisFormulario = this.crearCroquis(restantes, auto);
+      }
+    }
+
+    if (this.reservaForm.idAsiento) {
+      const asientoActual = this.asientosFormulario.find(a => a.id === this.reservaForm.idAsiento);
+      if (asientoActual && !this.asientoDisponibleParaFecha(asientoActual)) {
+        this.reservaForm.idAsiento = '';
+      }
+    }
   }
 
   seleccionarAsientoAdmin(asiento: AsientoDto) {
@@ -312,6 +352,7 @@ export class Reservas implements OnInit {
         this.asientos = todosAsientos || [];
         const asientosBackend = this.asientos.filter(a => a.idAuto === auto.id);
         this.asientosFormulario = this.completarAsientosVehiculo(asientosBackend, auto);
+        this.asientosFormulario = this.marcarAsientosReservadosPorFecha(this.asientosFormulario, this.reservaForm.fechaIda);
 
         this.copilotoFormulario = this.asientosFormulario.find(a =>
           a.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a.numeroAsiento || '')

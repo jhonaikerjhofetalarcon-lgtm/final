@@ -37,6 +37,7 @@
       </div>
     </section>
 
+    @for (m of manifiestos(); track (m.fecha + '-' + (m.destino || '')) ) {
     <section class="manifest-sheet">
       <div class="manifest-top">
         <div class="brand-mark">G7</div>
@@ -48,19 +49,22 @@
         </div>
         <div class="manifest-number">N 000208</div>
       </div>
+      <div class="manifest-actions no-print">
+        <button class="btn-print" (click)="imprimirManifiesto(m.fecha, m.destino)">Imprimir este manifiesto</button>
+      </div>
 
       <div class="manifest-lines">
         <div><span>CONDUCTOR:</span><strong>{{ conductor()?.nombre }}</strong></div>
         <div><span>N LIC. DE CONDUCIR:</span><strong>{{ licenciaConductor() }}</strong></div>
         <div><span>ORIGEN:</span><strong>{{ origenEmpresa }}</strong></div>
-        <div><span>DESTINO:</span><strong>{{ destinoPrincipal() }}</strong></div>
+        <div><span>DESTINO:</span><strong>{{ m.destino || m.pasajeros[0]?.destino || destinoPrincipal() }}</strong></div>
         <div><span>MODALIDAD DE SERVICIO:</span><strong>Turismo</strong></div>
-        <div><span>FECHA DE VIAJE:</span><strong>{{ fechaViaje() | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>FECHA DE VIAJE:</span><strong>{{ m.fecha | date:'dd/MM/yyyy' }}</strong></div>
         <div><span>N DE PLACA:</span><strong>{{ auto()?.placa }}</strong></div>
         <div><span>GUIA:</span><strong></strong></div>
       </div>
 
-      <h3>MANIFIESTO DE USUARIOS</h3>
+      <h3>MANIFIESTO DE USUARIOS - {{ m.fecha | date:'dd/MM/yyyy' }}</h3>
 
       <table class="manifest-table">
         <thead>
@@ -77,7 +81,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (p of filasManifiesto(); track $index) {
+          @for (p of filasManifiestoPara(m.pasajeros); track $index) {
           <tr>
             <td>{{ $index + 1 }}</td>
             <td>{{ p?.numeroAsiento || '' }}</td>
@@ -98,9 +102,10 @@
         <div></div>
       </div>
     </section>
+    }
 
     <div class="print-actions no-print">
-      <button class="btn-print" (click)="imprimir()">Imprimir manifiesto</button>
+      <button class="btn-print" (click)="imprimir()">Imprimir manifiestos</button>
     </div>
     }
   </section>

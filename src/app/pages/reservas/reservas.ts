@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { G7ApiService, AsientoDto, DestinoDto, AutoDto, PaqueteDto } from '../../core/g7-api.service';
+import { G7ApiService, AsientoDto, DestinoDto, AutoDto, PaqueteDto, ReservaDto } from '../../core/g7-api.service';
 import { firstValueFrom } from 'rxjs';
 
 interface Pasajero {
@@ -29,13 +29,13 @@ export class Reservas implements OnInit {
 
   destinos: DestinoDto[] = [];
   destinoSeleccionado: DestinoDto | null = null;
-  paqueteSeleccionado: PaqueteDto | null = null;
   autoSeleccionado: AutoDto | null = null;
   autosDisponibles: AutoDto[] = [];
 
   asientos: AsientoDto[] = [];
   asientosCroquis: AsientoSlot[][] = [];
   copiloto: AsientoDto | null = null;
+  reservas: ReservaDto[] = [];
 
   asientosSeleccionados: AsientoDto[] = [];
   pasajeros: Pasajero[] = [];
@@ -49,8 +49,8 @@ export class Reservas implements OnInit {
   numeroPersonas = 0;
 
   ngOnInit() {
+    this.cargarReservas();
     this.cargarDestinos();
-    this.cargarPaqueteDesdeUrl();
   }
 
   cargarDestinos() {
@@ -67,24 +67,15 @@ export class Reservas implements OnInit {
     });
   }
 
-  private cargarPaqueteDesdeUrl() {
-    const paqueteId = this.route.snapshot.queryParamMap.get('paqueteId');
-    if (!paqueteId) return;
-    this.api.getPaquete(paqueteId).subscribe({
-      next: (p) => this.paqueteSeleccionado = p,
-      error: () => {}
+  private cargarReservas() {
+    this.api.getReservas().subscribe({
+      next: (data) => this.reservas = data || [],
+      error: () => this.reservas = []
     });
   }
 
-  private preseleccionarDestino() {
-    if (!this.destinos.length) return;
-    const destinoId = this.route.snapshot.queryParamMap.get('destinoId');
-    const destino = this.destinos.find(d => d.id === destinoId) || this.destinos[0];
-
-    if (destino) {
-      this.destinoSeleccionado = destino;
-      this.onDestinoChange();
-    }
+  private cargarPaqueteDesdeUrl() {
+    // Sin usar paquetes
   }
 
   onDestinoChange() {
@@ -124,10 +115,12 @@ export class Reservas implements OnInit {
     this.api.getAutos().subscribe({
       next: (autos) => {
         const idsDestino = this.destinoSeleccionado?.idAutos || [];
-        this.autosDisponibles = autos
-          .filter(a => !idsDestino.length || idsDestino.includes(a.id))
-          .filter(a => this.esCarroPermitido(a))
-          .sort((a, b) => (a.cantidadAsiento || 0) - (b.cantidadAsiento || 0));
+        this.autosDisponibles = idsDestino.length > 0
+          ? autos
+              .filter(a => idsDestino.some(id => this.autoCoincideConDestino(id, a)))
+              .filter(a => this.esCarroPermitido(a))
+              .sort((a, b) => (a.cantidadAsiento || 0) - (b.cantidadAsiento || 0))
+          : [];
 
         if (!this.autosDisponibles.length) {
           this.errorApi = 'No hay carros disponibles para este destino.';
@@ -148,6 +141,13 @@ export class Reservas implements OnInit {
     if (this.autoSeleccionado) {
       this.cargarAsientosDelVehiculo(this.autoSeleccionado);
     }
+  }
+
+  onFechaSalidaChange() {
+    if (!this.autoSeleccionado) return;
+    this.asientosSeleccionados.forEach(a => a.estado = 'libre');
+    this.asientosSeleccionados = [];
+    this.cargarAsientosDelVehiculo(this.autoSeleccionado);
   }
 
   private esCarroPermitido(auto: AutoDto): boolean {
@@ -171,7 +171,8 @@ export class Reservas implements OnInit {
     this.api.getAsientos().subscribe({
       next: (todosAsientos) => {
         const asientosBackend = todosAsientos.filter(a => a.idAuto === auto.id);
-        this.asientos = this.completarAsientosVehiculo(asientosBackend, auto);
+        const asientosCargados = this.completarAsientosVehiculo(asientosBackend, auto);
+        this.asientos = this.aplicarReservasPorFecha(asientosCargados);
 
         this.copiloto = this.asientos.find(a =>
           a?.numeroAsiento?.toUpperCase().includes('C') || ['1', '01'].includes(a?.numeroAsiento || '')
@@ -216,6 +217,27 @@ export class Reservas implements OnInit {
     return filas;
   }
 
+  private aplicarReservasPorFecha(asientos: AsientoDto[]): AsientoDto[] {
+    const fechaSeleccionada = String(this.fechaSalida || '').slice(0, 10);
+    const reservasEnFecha = new Map(
+      this.reservas
+        .filter(r => String(r.fechaIda || '').slice(0, 10) === fechaSeleccionada)
+        .map(r => [r.idAsiento, r.id])
+    );
+
+    return asientos.map(asiento => {
+      if (!asiento) return asiento;
+      if (asiento.estado === 'ocupado') return asiento;
+
+      const reservaId = reservasEnFecha.get(asiento.id);
+      if (reservaId) {
+        return { ...asiento, estado: 'reservado', idReserva: reservaId };
+      }
+
+      return { ...asiento, estado: 'libre', idReserva: null };
+    });
+  }
+
   private crearCroquisMinivan15(asientos: AsientoDto[]): AsientoSlot[][] {
     const mapa = new Map(asientos.map(a => [this.normalizarNumero(a.numeroAsiento), a]));
     const asiento = (n: number) => mapa.get(String(n)) ?? null;
@@ -234,6 +256,15 @@ export class Reservas implements OnInit {
 
   private normalizarNumero(num: string): string {
     return String(num || '').replace(/\D/g, '');
+  }
+
+  private autoCoincideConDestino(idDestino: string, auto: AutoDto): boolean {
+    const valor = String(idDestino || '').trim().toLowerCase();
+    if (!valor) return false;
+    const idAuto = String(auto.id || '').trim().toLowerCase();
+    const placa = String(auto.placa || '').trim().toLowerCase();
+    const modelo = `${auto.marca || ''} ${auto.modelo || ''}`.trim().toLowerCase();
+    return idAuto === valor || placa === valor || modelo === valor;
   }
 
   toggleAsiento(asiento: AsientoDto) {
@@ -313,6 +344,10 @@ export class Reservas implements OnInit {
       this.enviado = true;
       this.mostrarModal = false;
       this.asientosSeleccionados = [];
+      this.cargarReservas();
+      if (this.autoSeleccionado) {
+        this.cargarAsientosDelVehiculo(this.autoSeleccionado);
+      }
 
     } catch (error) {
       console.error(error);

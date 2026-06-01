@@ -13,7 +13,7 @@
         <div class="form-grid">
             <div class="fg"><label>Label</label><input type="text" [(ngModel)]="fDestino.label"></div>
             <div class="fg"><label>Título *</label><input type="text" [(ngModel)]="fDestino.title"></div>
-            <div class="fg"><label>Nombre (slug) *</label><input type="text" [(ngModel)]="fDestino.name"></div>
+            <div class="fg"><label>Precio *</label><input type="text" [(ngModel)]="fDestino.name"></div>
             <div class="fg full"><label>Descripción</label><textarea [(ngModel)]="fDestino.desc" rows="3"></textarea>
             </div>
             <div class="fg"><label>Imagen Background (URL)</label><input type="text" [(ngModel)]="fDestino.bg"></div>
@@ -30,6 +30,11 @@
                     }
                 </select>
                 <small>Presiona <strong>Ctrl + Click</strong> para seleccionar varios vehículos</small>
+                <div style="margin-top:6px; font-size:0.9em; color:#b45309;">
+                    <strong>Atención:</strong> esta selección fija qué vehículos están asignados a este destino y
+                    determina los que podrán elegir los turistas en el formulario de reserva. Modificarla puede
+                    afectar reservas existentes. (Ejemplo: RTD-022 — MITSUBISHI FUSO ROSA, DCF-987 — MERCEDES SPRINTER, CEI-778 — Renault master)
+                </div>
             </div>
         </div>
         <div class="form-actions">

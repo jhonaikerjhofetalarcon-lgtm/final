@@ -42,6 +42,17 @@ export class Autos implements OnInit {
     });
   }
 
+  availableConductores(): UserDto[] {
+    // conductores que no están asignados a otro vehículo, o el conductor del vehículo en edición
+    return this.conductores.filter(c => {
+      const nombre = String(c.nombre || '').trim().toLowerCase();
+      const asignado = this.autos.find(a => String(a.conductor || '').trim().toLowerCase() === nombre);
+      if (!asignado) return true;
+      // si estamos editando y el auto asignado es el mismo que editamos, permitir
+      return this.editingId && asignado.id === this.editingId;
+    });
+  }
+
   abrirNuevo() {
     this.editingId = null;
     this.fAuto = this.emptyAuto();
@@ -65,6 +76,16 @@ export class Autos implements OnInit {
     if (payload.anioFabrica < 1990 || payload.cantidadAsiento < 1) {
       alert('Revisa el anio de fabricacion y la cantidad de asientos');
       return;
+    }
+
+    // prevenir asignar un conductor que ya tenga otro vehículo
+    if (payload.conductor) {
+      const nombre = String(payload.conductor || '').trim().toLowerCase();
+      const otro = this.autos.find(a => String(a.conductor || '').trim().toLowerCase() === nombre && a.id !== this.editingId);
+      if (otro) {
+        alert('El conductor seleccionado ya tiene un vehículo asignado. Elige otro conductor o desasigna el vehículo primero.');
+        return;
+      }
     }
 
     const operacion = this.editingId

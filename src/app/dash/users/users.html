@@ -35,18 +35,14 @@
             <div class="fg"><label>Tipo de Licencia</label>
                 <select [(ngModel)]="fUsuario.tipoLicencia">
                     <option value="">Seleccione categoría</option>
-                    <optgroup label="Categoría A - Motocicletas">
-                        <option value="A1">A1 - Hasta 50cc</option>
-                        <option value="A2">A2 - Hasta 250cc</option>
-                        <option value="A3">A3 - Más de 250cc</option>
+                    <optgroup label="Categoría ">
+                        <option value="A1">A1</option>
+                        <option value="A2A">A2A</option>
+                        <option value="A2B">A2B</option>
+                        <option value="A3A">A3A</option>
+                        <option value="A3C">A3C</option>
                     </optgroup>
-                    <optgroup label="Categoría B - Automóviles">
-                        <option value="B">B - Automóviles</option>
-                        <option value="B2">B2 - Camionetas</option>
-                    </optgroup>
-                    <optgroup label="Categoría D - Transporte Público">
-                        <option value="D">D - Combi / Microbus</option>
-                    </optgroup>
+                  
                 </select>
             </div>
             <div class="fg"><label>Vencimiento Licencia</label>
@@ -92,7 +88,7 @@
                         <td>
                             <div class="cell-user">
                                 <div class="avatar" [style.background]="avatarColor(u.nombre)">
-                                    {{ u.nombre?.charAt(0)?.toUpperCase() || '?' }}
+                                    {{ u.nombre ? (u.nombre.charAt(0).toUpperCase()) : '?' }}
                                 </div>
                                 <span>{{ u.nombre }}</span>
                             </div>
@@ -105,7 +101,7 @@
                                 {{ u.rol }}
                             </span>
                         </td>
-                        <td>{{ u.licencia || '-' }}</td>
+                        <td>{{ u.licencia || '-' }} {{ u.tipoLicencia ? '(' + u.tipoLicencia + ')' : '' }}</td>
                         <td class="td-act">
                             <button class="btn-ico edit" (click)="abrirEditar(u)" title="Editar">✏️</button>
                             <button class="btn-ico del" (click)="eliminar(u)" title="Eliminar">🗑️</button>
