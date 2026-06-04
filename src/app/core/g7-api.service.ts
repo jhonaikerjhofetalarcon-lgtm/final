@@ -48,6 +48,7 @@ export interface PaqueteDto {
   id_paquete: string;
   imagenes: string;
   estado: boolean;
+  idAutos?: string[];
 }
 
 export interface OfertaDto {
@@ -68,6 +69,7 @@ export interface PaqueteCreatePayload {
   id_paquete: string;
   imagenes: string;
   estado?: boolean;
+  idAutos?: string[];
 }
 
 export interface OfertaCreatePayload {
@@ -188,6 +190,15 @@ export interface ReservaDto {
   origen: string;
   idAsiento: string;
   notas: string;
+  paqueteId?: string;
+  paqueteTitulo?: string;
+  paqueteCodigo?: string;
+  cantidadPersonas?: number;
+  paquetePrecioUnitario?: number;
+  paqueteDescuento?: number;
+  paqueteMontoTotal?: number;
+  estadoReserva?: string;
+  estadoPago?: string;
   createdAt: string;
 }
 
@@ -203,6 +214,15 @@ export interface ReservaCreatePayload {
   dni: number;
   idAsiento: string;
   notas: string;
+  paqueteId?: string;
+  paqueteTitulo?: string;
+  paqueteCodigo?: string;
+  cantidadPersonas?: number;
+  paquetePrecioUnitario?: number;
+  paqueteDescuento?: number;
+  paqueteMontoTotal?: number;
+  estadoReserva?: string;
+  estadoPago?: string;
 }
 
 export interface PagoDto {

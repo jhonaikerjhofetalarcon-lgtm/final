@@ -259,6 +259,8 @@ export class Reservas implements OnInit {
       r.nombre?.toLowerCase().includes(term) ||
       r.apellido?.toLowerCase().includes(term) ||
       r.destino?.toLowerCase().includes(term) ||
+      r.paqueteTitulo?.toLowerCase().includes(term) ||
+      r.paqueteCodigo?.toLowerCase().includes(term) ||
       r.email?.toLowerCase().includes(term)
     );
   }

@@ -48,6 +48,17 @@
           Descripcion
           <textarea rows="3" [(ngModel)]="form.descripcion"></textarea>
         </label>
+        <label class="full">
+          Vehiculos asignados
+          <select [(ngModel)]="form.idAutos" multiple class="multi-select">
+            @for (a of autosRaw(); track a.id) {
+              <option [value]="a.id">
+                {{ a.placa }} - {{ a.marca }} {{ a.modelo }}
+              </option>
+            }
+          </select>
+          <small>Usa Ctrl + click para seleccionar varios vehiculos. Maximo 4.</small>
+        </label>
         <div class="toggle-line">
           <mat-slide-toggle [(ngModel)]="form.estado" color="primary">Paquete activo</mat-slide-toggle>
         </div>
@@ -87,6 +98,10 @@
           </div>
 
           <p class="package-desc">{{ item.descripcion || 'Sin descripcion registrada.' }}</p>
+
+          <div class="vehicle-line">
+            <strong>Vehiculos:</strong> {{ getAutoInfo(item.idAutos) }}
+          </div>
 
           <div class="price-section">
             @if (item.oferta) {

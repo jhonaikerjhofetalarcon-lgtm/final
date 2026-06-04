@@ -42,6 +42,15 @@ public class ReservaService {
     e.setIdAsiento(req.idAsiento());
     e.setNotas(req.notas());
     e.setOrigen(req.origen());           // ← NUEVO
+    e.setPaqueteId(req.paqueteId());
+    e.setPaqueteTitulo(req.paqueteTitulo());
+    e.setPaqueteCodigo(req.paqueteCodigo());
+    e.setCantidadPersonas(req.cantidadPersonas());
+    e.setPaquetePrecioUnitario(req.paquetePrecioUnitario());
+    e.setPaqueteDescuento(req.paqueteDescuento());
+    e.setPaqueteMontoTotal(req.paqueteMontoTotal());
+    e.setEstadoReserva(req.estadoReserva());
+    e.setEstadoPago(req.estadoPago());
     e.setCreatedAt(Instant.now());
 
     return ReservaResponse.from(repo.save(e));

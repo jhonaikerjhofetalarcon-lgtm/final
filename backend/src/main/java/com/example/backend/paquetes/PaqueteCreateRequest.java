@@ -2,6 +2,7 @@ package com.example.backend.paquetes;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
 public record PaqueteCreateRequest(
   @NotBlank String titulo,
@@ -9,5 +10,6 @@ public record PaqueteCreateRequest(
   @NotNull Long presio,
   String id_paquete,
   String imagenes,
-  Boolean estado
+  Boolean estado,
+  List<String> idAutos
 ) {}

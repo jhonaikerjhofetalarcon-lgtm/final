@@ -1,5 +1,8 @@
 package com.example.backend.paquetes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PaqueteEntity {
   private String id;
   private String titulo;
@@ -8,6 +11,7 @@ public class PaqueteEntity {
   private String id_paquete;
   private String imagenes;
   private Boolean estado;
+  private List<String> idAutos = new ArrayList<>();
 
   // Getters y Setters
   public String getId() { return id; }
@@ -24,4 +28,6 @@ public class PaqueteEntity {
   public void setImagenes(String i) { this.imagenes = i; }
   public Boolean getEstado() { return estado; }
   public void setEstado(Boolean e) { this.estado = e; }
+  public List<String> getIdAutos() { return idAutos; }
+  public void setIdAutos(List<String> idAutos) { this.idAutos = idAutos != null ? idAutos : new ArrayList<>(); }
 }

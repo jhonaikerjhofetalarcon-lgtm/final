@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { G7ApiService, OfertaDto, PaqueteDto } from '../../core/g7-api.service';
+import { AutoDto, G7ApiService, OfertaDto, PaqueteDto } from '../../core/g7-api.service';
 
 @Component({
   selector: 'app-paquete-detalle',
@@ -28,6 +28,7 @@ export class PaqueteDetalle implements OnInit {
 
   paquete = signal<PaqueteDto | null>(null);
   ofertas = signal<OfertaDto[]>([]);
+  autos = signal<AutoDto[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
 
@@ -68,5 +69,33 @@ export class PaqueteDetalle implements OnInit {
       next: data => this.ofertas.set(data || []),
       error: () => this.ofertas.set([]),
     });
+
+    this.api.getAutos().subscribe({
+      next: data => this.autos.set(data || []),
+      error: () => this.autos.set([]),
+    });
+  }
+
+  getAutoInfo(idAutos?: string[]): string {
+    if (!idAutos || idAutos.length === 0) {
+      return 'Sin vehiculo asignado';
+    }
+
+    return idAutos
+      .map(id => {
+        const auto = this.autos().find(a => this.autoCoincide(id, a));
+        return auto ? `${auto.placa} - ${auto.marca} ${auto.modelo}` : 'Desconocido';
+      })
+      .join(', ');
+  }
+
+  private autoCoincide(id: string, auto: AutoDto): boolean {
+    const valor = String(id || '').trim().toLowerCase();
+    if (!valor) return false;
+
+    const idAuto = String(auto.id || '').trim().toLowerCase();
+    const placa = String(auto.placa || '').trim().toLowerCase();
+    const modelo = `${auto.marca || ''} ${auto.modelo || ''}`.trim().toLowerCase();
+    return idAuto === valor || placa === valor || modelo === valor;
   }
 }

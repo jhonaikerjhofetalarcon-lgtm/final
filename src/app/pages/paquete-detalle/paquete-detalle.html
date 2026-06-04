@@ -31,6 +31,7 @@
           <li><strong>Codigo:</strong> {{ p.id_paquete || p.id }}</li>
           <li><strong>Estado:</strong> {{ p.estado ? 'Disponible' : 'No disponible' }}</li>
           <li><strong>Precio final:</strong> S/. {{ precioFinal() | number:'1.0-2' }}</li>
+          <li><strong>Vehiculos:</strong> {{ getAutoInfo(p.idAutos) }}</li>
         </ul>
         <a [routerLink]="['/reservas']" [queryParams]="{ paqueteId: p.id }" class="btn-primary inline">Ir al formulario de reserva</a>
       </div>

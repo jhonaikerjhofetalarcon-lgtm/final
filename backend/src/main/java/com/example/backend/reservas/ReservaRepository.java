@@ -55,6 +55,15 @@ public class ReservaRepository {
     data.put("idAsiento", e.getIdAsiento() != null ? e.getIdAsiento() : "");
     data.put("notas", e.getNotas() != null ? e.getNotas() : "");
     data.put("origen", e.getOrigen() != null ? e.getOrigen() : "");  // ← NUEVO
+    data.put("paqueteId", e.getPaqueteId() != null ? e.getPaqueteId() : "");
+    data.put("paqueteTitulo", e.getPaqueteTitulo() != null ? e.getPaqueteTitulo() : "");
+    data.put("paqueteCodigo", e.getPaqueteCodigo() != null ? e.getPaqueteCodigo() : "");
+    data.put("cantidadPersonas", e.getCantidadPersonas() != null ? e.getCantidadPersonas() : 0);
+    data.put("paquetePrecioUnitario", e.getPaquetePrecioUnitario() != null ? e.getPaquetePrecioUnitario() : 0.0);
+    data.put("paqueteDescuento", e.getPaqueteDescuento() != null ? e.getPaqueteDescuento() : 0.0);
+    data.put("paqueteMontoTotal", e.getPaqueteMontoTotal() != null ? e.getPaqueteMontoTotal() : 0.0);
+    data.put("estadoReserva", e.getEstadoReserva() != null ? e.getEstadoReserva() : "");
+    data.put("estadoPago", e.getEstadoPago() != null ? e.getEstadoPago() : "");
     data.put("createdAt", e.getCreatedAt() != null ? e.getCreatedAt().toString() : Instant.now().toString());
 
     get(col.document(e.getId()).set(data));
@@ -75,6 +84,16 @@ public class ReservaRepository {
     e.setDestino(safeStr(d, "destino"));
     e.setNotas(safeStr(d, "notas"));
     e.setOrigen(safeStr(d, "origen"));        // ← NUEVO
+
+    e.setPaqueteId(safeStr(d, "paqueteId"));
+    e.setPaqueteTitulo(safeStr(d, "paqueteTitulo"));
+    e.setPaqueteCodigo(safeStr(d, "paqueteCodigo"));
+    e.setCantidadPersonas(safeInt(d, "cantidadPersonas"));
+    e.setPaquetePrecioUnitario(safeDouble(d, "paquetePrecioUnitario"));
+    e.setPaqueteDescuento(safeDouble(d, "paqueteDescuento"));
+    e.setPaqueteMontoTotal(safeDouble(d, "paqueteMontoTotal"));
+    e.setEstadoReserva(safeStr(d, "estadoReserva"));
+    e.setEstadoPago(safeStr(d, "estadoPago"));
 
     // Fechas
     String fechaIdaStr = safeStr(d, "fechaIda");
@@ -106,6 +125,15 @@ public class ReservaRepository {
       try { return Integer.parseInt(s); } catch (Exception ignored) {}
     }
     return 0;
+  }
+
+  private double safeDouble(DocumentSnapshot d, String field) {
+    Object v = d.get(field);
+    if (v instanceof Number n) return n.doubleValue();
+    if (v instanceof String s) {
+      try { return Double.parseDouble(s); } catch (Exception ignored) {}
+    }
+    return 0.0;
   }
 
   private Instant safeInstant(DocumentSnapshot d, String field) {

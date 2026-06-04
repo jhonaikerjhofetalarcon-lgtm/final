@@ -23,8 +23,16 @@ public class ReservaEntity {
   private String notas;
   private Instant createdAt;
 
-  // NUEVO CAMPO
   private String origen;
+  private String paqueteId;
+  private String paqueteTitulo;
+  private String paqueteCodigo;
+  private Integer cantidadPersonas;
+  private Double paquetePrecioUnitario;
+  private Double paqueteDescuento;
+  private Double paqueteMontoTotal;
+  private String estadoReserva;
+  private String estadoPago;
 
   // ==================== GETTERS Y SETTERS ====================
 
@@ -64,7 +72,33 @@ public class ReservaEntity {
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-  // NUEVO
   public String getOrigen() { return origen; }
   public void setOrigen(String origen) { this.origen = origen; }
+
+  public String getPaqueteId() { return paqueteId; }
+  public void setPaqueteId(String paqueteId) { this.paqueteId = paqueteId; }
+
+  public String getPaqueteTitulo() { return paqueteTitulo; }
+  public void setPaqueteTitulo(String paqueteTitulo) { this.paqueteTitulo = paqueteTitulo; }
+
+  public String getPaqueteCodigo() { return paqueteCodigo; }
+  public void setPaqueteCodigo(String paqueteCodigo) { this.paqueteCodigo = paqueteCodigo; }
+
+  public Integer getCantidadPersonas() { return cantidadPersonas; }
+  public void setCantidadPersonas(Integer cantidadPersonas) { this.cantidadPersonas = cantidadPersonas; }
+
+  public Double getPaquetePrecioUnitario() { return paquetePrecioUnitario; }
+  public void setPaquetePrecioUnitario(Double paquetePrecioUnitario) { this.paquetePrecioUnitario = paquetePrecioUnitario; }
+
+  public Double getPaqueteDescuento() { return paqueteDescuento; }
+  public void setPaqueteDescuento(Double paqueteDescuento) { this.paqueteDescuento = paqueteDescuento; }
+
+  public Double getPaqueteMontoTotal() { return paqueteMontoTotal; }
+  public void setPaqueteMontoTotal(Double paqueteMontoTotal) { this.paqueteMontoTotal = paqueteMontoTotal; }
+
+  public String getEstadoReserva() { return estadoReserva; }
+  public void setEstadoReserva(String estadoReserva) { this.estadoReserva = estadoReserva; }
+
+  public String getEstadoPago() { return estadoPago; }
+  public void setEstadoPago(String estadoPago) { this.estadoPago = estadoPago; }
 }

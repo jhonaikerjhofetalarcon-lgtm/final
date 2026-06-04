@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { G7ApiService, OfertaDto, PaqueteCreatePayload, PaqueteDto } from '../../core/g7-api.service';
+import { AutoDto, G7ApiService, OfertaDto, PaqueteCreatePayload, PaqueteDto } from '../../core/g7-api.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -16,6 +16,7 @@ interface PaqueteForm {
   id_paquete: string;
   imagenes: string;
   estado: boolean;
+  idAutos: string[];
 }
 
 interface PaqueteConOferta extends PaqueteDto {
@@ -44,6 +45,7 @@ export class Paquetes implements OnInit {
 
   paquetesRaw = signal<PaqueteDto[]>([]);
   ofertasRaw = signal<OfertaDto[]>([]);
+  autosRaw = signal<AutoDto[]>([]);
   formVisible = signal(false);
   editingId = signal<string | null>(null);
   error = signal<string | null>(null);
@@ -75,6 +77,10 @@ export class Paquetes implements OnInit {
       next: data => this.ofertasRaw.set(data || []),
       error: () => this.error.set('No se pudieron cargar las ofertas activas.')
     });
+    this.api.getAutos().subscribe({
+      next: data => this.autosRaw.set(data || []),
+      error: () => this.error.set('No se pudieron cargar los vehiculos.')
+    });
   }
 
   abrirNuevo(): void {
@@ -91,7 +97,8 @@ export class Paquetes implements OnInit {
       presio: Number(paquete.presio) || 0,
       id_paquete: paquete.id_paquete,
       imagenes: paquete.imagenes,
-      estado: paquete.estado
+      estado: paquete.estado,
+      idAutos: this.normalizarIdAutos(paquete.idAutos || [])
     };
     this.editingId.set(paquete.id);
     this.formVisible.set(true);
@@ -109,6 +116,11 @@ export class Paquetes implements OnInit {
 
     if (!payload.titulo || payload.presio <= 0) {
       this.error.set('Ingresa un titulo y un precio mayor a 0.');
+      return;
+    }
+
+    if ((payload.idAutos || []).length > 4) {
+      this.error.set('No puedes asignar mas de 4 vehiculos a un paquete.');
       return;
     }
 
@@ -153,8 +165,39 @@ export class Paquetes implements OnInit {
       presio: Number(this.form.presio) || 0,
       id_paquete: this.form.id_paquete?.trim() || '',
       imagenes: this.form.imagenes?.trim() || '',
-      estado: Boolean(this.form.estado)
+      estado: Boolean(this.form.estado),
+      idAutos: this.form.idAutos || []
     };
+  }
+
+  getAutoInfo(idAutos?: string[]): string {
+    if (!idAutos || idAutos.length === 0) {
+      return 'Sin vehiculo asignado';
+    }
+
+    return idAutos
+      .map(id => {
+        const auto = this.autosRaw().find(a => this.autoCoincide(id, a));
+        return auto ? `${auto.placa} - ${auto.marca} ${auto.modelo}` : 'Desconocido';
+      })
+      .join(', ');
+  }
+
+  private autoCoincide(id: string, auto: AutoDto): boolean {
+    const valor = String(id || '').trim().toLowerCase();
+    if (!valor) return false;
+
+    const idAuto = String(auto.id || '').trim().toLowerCase();
+    const placa = String(auto.placa || '').trim().toLowerCase();
+    const modelo = `${auto.marca || ''} ${auto.modelo || ''}`.trim().toLowerCase();
+    return idAuto === valor || placa === valor || modelo === valor;
+  }
+
+  private normalizarIdAutos(idAutos: string[] = []): string[] {
+    return idAutos.map(id => {
+      const auto = this.autosRaw().find(a => this.autoCoincide(id, a));
+      return auto ? auto.id : id;
+    });
   }
 
   private emptyForm(): PaqueteForm {
@@ -164,7 +207,8 @@ export class Paquetes implements OnInit {
       presio: 0,
       id_paquete: '',
       imagenes: '',
-      estado: true
+      estado: true,
+      idAutos: []
     };
   }
 

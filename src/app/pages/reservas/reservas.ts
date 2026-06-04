@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { G7ApiService, AsientoDto, DestinoDto, AutoDto, PaqueteDto, ReservaDto } from '../../core/g7-api.service';
+import { G7ApiService, AsientoDto, DestinoDto, AutoDto, OfertaDto, PaqueteDto, ReservaDto } from '../../core/g7-api.service';
 import { firstValueFrom } from 'rxjs';
 
 interface Pasajero {
@@ -31,6 +31,10 @@ export class Reservas implements OnInit {
   destinoSeleccionado: DestinoDto | null = null;
   autoSeleccionado: AutoDto | null = null;
   autosDisponibles: AutoDto[] = [];
+  paqueteSeleccionado: PaqueteDto | null = null;
+  ofertaSeleccionada: OfertaDto | null = null;
+  paqueteCargando = false;
+  paqueteError: string | null = null;
 
   asientos: AsientoDto[] = [];
   asientosCroquis: AsientoSlot[][] = [];
@@ -46,11 +50,12 @@ export class Reservas implements OnInit {
   errorApi: string | null = null;
   reservasConfirmadas = 0;
   fechaSalida = '2026-06-15';
-  numeroPersonas = 0;
+  numeroPersonas = 1;
 
   ngOnInit() {
     this.cargarReservas();
     this.cargarDestinos();
+    this.cargarPaqueteDesdeUrl();
   }
 
   cargarDestinos() {
@@ -75,11 +80,62 @@ export class Reservas implements OnInit {
   }
 
   private cargarPaqueteDesdeUrl() {
-    // Sin usar paquetes
+    const paqueteId = this.route.snapshot.queryParamMap.get('paqueteId');
+    if (!paqueteId) return;
+
+    this.paqueteCargando = true;
+    this.paqueteError = null;
+    this.numeroPersonas = Math.max(1, Number(this.numeroPersonas) || 1);
+
+    this.api.getPaquete(paqueteId).subscribe({
+      next: (paquete) => {
+        this.paqueteSeleccionado = paquete;
+        this.destinoSeleccionado = null;
+        this.paqueteCargando = false;
+        this.cargarOfertaDelPaquete(paquete.id);
+        this.cargarCarrosDisponibles();
+      },
+      error: () => {
+        this.paqueteCargando = false;
+        this.paqueteError = 'No se pudo cargar el paquete seleccionado.';
+      }
+    });
+  }
+
+  private cargarOfertaDelPaquete(paqueteId: string) {
+    this.api.getOfertasActivas().subscribe({
+      next: (ofertas) => {
+        this.ofertaSeleccionada = (ofertas || []).find(o => o.estado && o.paqueteId === paqueteId) || null;
+      },
+      error: () => this.ofertaSeleccionada = null
+    });
+  }
+
+  private preseleccionarDestino() {
+    const destinoParam = this.route.snapshot.queryParamMap.get('destinoId')
+      || this.route.snapshot.queryParamMap.get('destino');
+
+    if (this.destinoSeleccionado) return;
+
+    if (!destinoParam) return;
+
+    const valor = destinoParam.trim().toLowerCase();
+    const destino = this.destinos.find(d =>
+      d.id?.toLowerCase() === valor ||
+      d.title?.toLowerCase() === valor ||
+      d.name?.toLowerCase() === valor
+    );
+
+    if (destino) {
+      this.destinoSeleccionado = destino;
+      this.cargarCarrosDisponibles();
+      return;
+    }
+
   }
 
   onDestinoChange() {
-    this.numeroPersonas = 0;
+    this.numeroPersonas = Math.max(1, Number(this.numeroPersonas) || 1);
     this.autoSeleccionado = null;
     this.autosDisponibles = [];
     this.asientosSeleccionados = [];
@@ -90,18 +146,43 @@ export class Reservas implements OnInit {
   }
 
   onNumeroPersonasChange() {
+    this.numeroPersonas = Math.max(1, Math.floor(Number(this.numeroPersonas) || 1));
     this.asientosSeleccionados.forEach(a => a.estado = 'libre');
     this.asientosSeleccionados = [];
+
+    if (this.paqueteSeleccionado || this.destinoSeleccionado) {
+      this.cargarCarrosDisponibles();
+    }
   }
 
   totalPersonasReserva(): number {
-    return Number(this.numeroPersonas) > 0
-      ? Number(this.numeroPersonas)
-      : this.asientosSeleccionados.length;
+    return Math.max(1, Number(this.numeroPersonas) || this.asientosSeleccionados.length || 1);
+  }
+
+  precioPaqueteBase(): number {
+    return Number(this.paqueteSeleccionado?.presio) || 0;
+  }
+
+  descuentoPaquete(): number {
+    return Number(this.ofertaSeleccionada?.descuento) || 0;
+  }
+
+  precioPaqueteFinal(): number {
+    const base = this.precioPaqueteBase();
+    const descuento = this.descuentoPaquete();
+    return descuento > 0 ? base - (base * descuento / 100) : base;
+  }
+
+  montoTotalReserva(): number {
+    return this.precioPaqueteFinal() * this.totalPersonasReserva();
+  }
+
+  tituloReservaConfirmada(): string {
+    return this.paqueteSeleccionado?.titulo || this.destinoSeleccionado?.title || 'tu viaje';
   }
 
   cargarCarrosDisponibles() {
-    if (!this.destinoSeleccionado) {
+    if (!this.destinoSeleccionado && !this.paqueteSeleccionado) {
       this.autoSeleccionado = null;
       this.autosDisponibles = [];
       this.asientosCroquis = [];
@@ -114,16 +195,33 @@ export class Reservas implements OnInit {
 
     this.api.getAutos().subscribe({
       next: (autos) => {
-        const idsDestino = this.destinoSeleccionado?.idAutos || [];
-        this.autosDisponibles = idsDestino.length > 0
-          ? autos
-              .filter(a => idsDestino.some(id => this.autoCoincideConDestino(id, a)))
-              .filter(a => this.esCarroPermitido(a))
-              .sort((a, b) => (a.cantidadAsiento || 0) - (b.cantidadAsiento || 0))
-          : [];
+        const personas = this.totalPersonasReserva();
+        const autosPermitidos = (autos || [])
+          .filter(a => this.esCarroPermitido(a))
+          .filter(a => (Number(a.cantidadAsiento) || 0) >= personas)
+          .sort((a, b) => (a.cantidadAsiento || 0) - (b.cantidadAsiento || 0));
+
+        if (this.paqueteSeleccionado) {
+          const idsPaquete = this.paqueteSeleccionado.idAutos || [];
+          this.autosDisponibles = idsPaquete.length > 0
+            ? autosPermitidos.filter(a => idsPaquete.some(id => this.autoCoincideConDestino(id, a)))
+            : autosPermitidos;
+        } else {
+          const idsDestino = this.destinoSeleccionado?.idAutos || [];
+          this.autosDisponibles = idsDestino.length > 0
+            ? autosPermitidos.filter(a => idsDestino.some(id => this.autoCoincideConDestino(id, a)))
+            : [];
+        }
+
+        this.autoSeleccionado = this.autosDisponibles[0] ?? null;
+        if (this.autoSeleccionado) {
+          this.cargarAsientosDelVehiculo(this.autoSeleccionado);
+        }
 
         if (!this.autosDisponibles.length) {
-          this.errorApi = 'No hay carros disponibles para este destino.';
+          this.errorApi = this.paqueteSeleccionado
+            ? 'No hay carros disponibles para la cantidad de pasajeros del paquete.'
+            : 'No hay carros disponibles para este destino.';
         }
       },
       error: () => this.errorApi = 'Error al cargar carros disponibles',
@@ -304,7 +402,7 @@ export class Reservas implements OnInit {
   }
 
   async confirmarReservas() {
-    if (!this.destinoSeleccionado || this.asientosSeleccionados.length === 0) return;
+    if ((!this.destinoSeleccionado && !this.paqueteSeleccionado) || this.asientosSeleccionados.length === 0) return;
 
     this.cargando = true;
     this.errorApi = null;
@@ -322,18 +420,38 @@ export class Reservas implements OnInit {
             }))
           : asiento;
 
+        const totalPersonas = this.totalPersonasReserva();
+        const precioUnitario = this.precioPaqueteFinal();
+        const montoTotal = this.montoTotalReserva();
+        const detallePaquete = this.paqueteSeleccionado
+          ? `Paquete ${this.paqueteSeleccionado.titulo}`
+          : '';
+
         const payload = {
           nombre: p.nombre,
           apellido: p.apellido,
           email: p.email,
           telefono: p.telefono,
-          origen: p.origen,
-          destino: this.destinoSeleccionado.title || '',
+          origen: p.origen || 'No especificado',
+          destino: this.paqueteSeleccionado?.titulo || this.destinoSeleccionado?.title || '',
           fechaIda: this.fechaSalida,
           fechaVuelta: this.fechaSalida,
           dni: p.dni,
           idAsiento: asientoBackend.id,
-          notas: `Asiento ${asiento.numeroAsiento} - ${this.autoSeleccionado?.marca || ''} ${this.autoSeleccionado?.modelo || ''}`.trim()
+          notas: [
+            `Asiento ${asiento.numeroAsiento}`,
+            `${this.autoSeleccionado?.marca || ''} ${this.autoSeleccionado?.modelo || ''}`.trim(),
+            detallePaquete
+          ].filter(Boolean).join(' - '),
+          paqueteId: this.paqueteSeleccionado?.id,
+          paqueteTitulo: this.paqueteSeleccionado?.titulo,
+          paqueteCodigo: this.paqueteSeleccionado?.id_paquete,
+          cantidadPersonas: totalPersonas,
+          paquetePrecioUnitario: precioUnitario,
+          paqueteDescuento: this.descuentoPaquete(),
+          paqueteMontoTotal: montoTotal,
+          estadoReserva: this.paqueteSeleccionado ? 'pendiente_pago' : 'confirmada',
+          estadoPago: 'pendiente'
         };
 
         const reserva = await firstValueFrom(this.api.createReserva(payload));
@@ -364,11 +482,14 @@ export class Reservas implements OnInit {
     this.mostrarModal = false;
     this.destinoSeleccionado = null;
     this.autoSeleccionado = null;
+    this.paqueteSeleccionado = null;
+    this.ofertaSeleccionada = null;
+    this.paqueteError = null;
     this.autosDisponibles = [];
     this.asientos = [];
     this.asientosCroquis = [];
     this.copiloto = null;
-    this.numeroPersonas = 0;
+    this.numeroPersonas = 1;
     this.errorApi = null;
   }
 

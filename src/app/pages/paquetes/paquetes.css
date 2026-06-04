@@ -167,6 +167,21 @@
   line-height: 1.5;
 }
 
+.vehicle-line {
+  margin: 0 0 18px;
+  padding: 11px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475467;
+  font-size: .92rem;
+  line-height: 1.45;
+}
+
+.vehicle-line strong {
+  color: #1f2937;
+}
+
 .lodging-preview {
   display: grid;
   gap: 10px;

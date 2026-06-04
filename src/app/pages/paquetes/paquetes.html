@@ -39,6 +39,10 @@
               <h3>{{ p.titulo }}</h3>
               <p>{{ p.descripcion || 'Paquete turistico disponible para reservar.' }}</p>
 
+              <div class="vehicle-line">
+                <strong>Vehiculos:</strong> {{ getAutoInfo(p.idAutos) }}
+              </div>
+
               <div class="lodging-preview">
                 <div>
                   <span>Hospedaje incluido</span>

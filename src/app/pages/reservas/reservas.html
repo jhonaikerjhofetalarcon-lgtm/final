@@ -7,7 +7,7 @@
   <div class="success-card">
     <div class="success-icon">OK</div>
     <h2>Reserva Confirmada</h2>
-    <p>Se registraron <strong>{{ reservasConfirmadas }}</strong> asiento(s) para <strong>{{ destinoSeleccionado?.title }}</strong></p>
+    <p>Se registraron <strong>{{ reservasConfirmadas }}</strong> asiento(s) para <strong>{{ tituloReservaConfirmada() }}</strong></p>
     <button class="btn-primary" (click)="nuevaReserva()">Hacer otra reserva</button>
   </div>
   }
@@ -18,38 +18,102 @@
       <h1>Reserva tu Viaje</h1>
     </div>
 
+    @if (paqueteCargando) {
+    <div class="selected-package-card">
+      <h2>Cargando paquete</h2>
+      <div class="package-info">
+        <p>Preparando los datos del paquete seleccionado...</p>
+      </div>
+    </div>
+    }
+
+    @if (paqueteError) {
+    <p class="api-error">{{ paqueteError }}</p>
+    }
+
+    @if (paqueteSeleccionado; as paquete) {
+    <div class="selected-package-card">
+      <div class="package-head">
+        <div>
+          <span>{{ paquete.id_paquete || 'PAQUETE' }}</span>
+          <h2>{{ paquete.titulo }}</h2>
+        </div>
+        <div class="package-price">
+          @if (descuentoPaquete() > 0) {
+          <small>S/. {{ precioPaqueteBase() | number:'1.0-2' }}</small>
+          <b>-{{ descuentoPaquete() }}%</b>
+          }
+          <strong>S/. {{ precioPaqueteFinal() | number:'1.0-2' }}</strong>
+          <em>por persona</em>
+        </div>
+      </div>
+
+      <p>{{ paquete.descripcion || 'Paquete turistico seleccionado para esta reserva.' }}</p>
+
+      <div class="package-summary">
+        <div>
+          <span>Pasajeros</span>
+          <strong>{{ totalPersonasReserva() }}</strong>
+        </div>
+        <div>
+          <span>Total estimado</span>
+          <strong>S/. {{ montoTotalReserva() | number:'1.0-2' }}</strong>
+        </div>
+        <div>
+          <span>Estado</span>
+          <strong>Pendiente de pago</strong>
+        </div>
+      </div>
+    </div>
+    }
+
     <div class="form-group">
       <label>Fecha de Salida</label>
       <input class="destino-select" type="date" [(ngModel)]="fechaSalida" (ngModelChange)="onFechaSalidaChange()" />
     </div>
 
     <div class="form-group">
-      <label>Destino</label>
-      <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
-        <option [ngValue]="null">Selecciona un destino</option>
-        @for (d of destinos; track d.id) {
-        <option [ngValue]="d">{{ d.title }}</option>
-        }
-      </select>
+      <label>Numero de pasajeros</label>
+      <input
+        class="destino-select"
+        type="number"
+        min="1"
+        step="1"
+        [(ngModel)]="numeroPersonas"
+        (ngModelChange)="onNumeroPersonasChange()"
+      />
     </div>
 
-    @if (destinoSeleccionado && autosDisponibles.length > 0) {
+    @if (!paqueteSeleccionado) {
+      <div class="form-group">
+        <label>Destino</label>
+        <select [(ngModel)]="destinoSeleccionado" (ngModelChange)="onDestinoChange()" class="destino-select">
+          <option [ngValue]="null">Selecciona un destino</option>
+          @for (d of destinos; track d.id) {
+          <option [ngValue]="d">{{ d.title }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (destinoSeleccionado || paqueteSeleccionado) {
+    @if (autoSeleccionado; as auto) {
     <div class="vehiculo-info">
       <h3>Carro elegido</h3>
-      <div><strong>{{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }}</strong></div>
-      <div>Placa: {{ autoSeleccionado.placa }}</div>
-      <div>Tipo: {{ autoSeleccionado.tipo }} - {{ autoSeleccionado.cantidadAsiento }} pasajeros</div>
-      <div>Conductor: {{ autoSeleccionado.conductor || 'No asignado' }}</div>
+      <div><strong>{{ auto.marca }} {{ auto.modelo }}</strong></div>
+      <div>Placa: {{ auto.placa }}</div>
+      <div>Tipo: {{ auto.tipo }} - {{ auto.cantidadAsiento }} pasajeros</div>
+      <div>Conductor: {{ auto.conductor || 'No asignado' }}</div>
     </div>
 
     <div class="seat-section">
       <h3>Asientos disponibles</h3>
 
       <div class="bus-container"
-        [class.minivan]="(autoSeleccionado.modelo.toLowerCase() || '').includes('master') || autoSeleccionado.cantidadAsiento === 15">
+        [class.minivan]="(auto.modelo || '').toLowerCase().includes('master') || auto.cantidadAsiento === 15">
 
         <div class="vehicle-label">
-          {{ autoSeleccionado.marca }} {{ autoSeleccionado.modelo }} {{ autoSeleccionado.anioFabrica }}
+          {{ auto.marca }} {{ auto.modelo }} {{ auto.anioFabrica }}
         </div>
 
         <div class="front-row">
@@ -89,13 +153,35 @@
         <span class="caja seleccionado"></span> Seleccionado
         <span class="caja ocupado"></span> Ocupado
       </div>
+
+      <div class="seat-progress">
+        <strong>{{ asientosSeleccionados.length }}</strong> de <strong>{{ totalPersonasReserva() }}</strong> asientos seleccionados
+      </div>
     </div>
 
+    @if (paqueteSeleccionado; as paqueteResumen) {
+    <div class="reservation-summary">
+      <div>
+        <span>Paquete</span>
+        <strong>{{ paqueteResumen.titulo }}</strong>
+      </div>
+      <div>
+        <span>Personas</span>
+        <strong>{{ totalPersonasReserva() }}</strong>
+      </div>
+      <div>
+        <span>Total</span>
+        <strong>S/. {{ montoTotalReserva() | number:'1.0-2' }}</strong>
+      </div>
+    </div>
+    }
+
     <button class="btn-primary btn-large"
-      [disabled]="asientosSeleccionados.length === 0 || cargando"
+      [disabled]="asientosSeleccionados.length !== totalPersonasReserva() || cargando"
       (click)="abrirFormularioPasajeros()">
-      Continuar con {{ asientosSeleccionados.length }} asiento(s)
+      Continuar con {{ asientosSeleccionados.length }} de {{ totalPersonasReserva() }} asiento(s)
     </button>
+    }
     }
   </div>
   }

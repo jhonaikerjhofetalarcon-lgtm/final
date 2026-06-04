@@ -165,7 +165,13 @@
               <strong>{{ r.nombre }} {{ r.apellido }}</strong><br>
               <small>{{ r.email }}</small>
             </td>
-            <td>{{ r.destino }}</td>
+            <td>
+              {{ r.destino }}
+              @if (r.paqueteTitulo) {
+              <br>
+              <small>Paquete: {{ r.paqueteTitulo }}</small>
+              }
+            </td>
             <td><strong>{{ vehiculoReserva(r) }}</strong></td>
             <td>
               <small>Ida: {{ r.fechaIda | date:'dd/MM' }}</small><br>

@@ -17,6 +17,14 @@ public record ReservaCreateRequest(
   @NotBlank String idAsiento,
   String notas,
 
-  // NUEVO CAMPO
-  String origen
+  String origen,
+  String paqueteId,
+  String paqueteTitulo,
+  String paqueteCodigo,
+  Integer cantidadPersonas,
+  Double paquetePrecioUnitario,
+  Double paqueteDescuento,
+  Double paqueteMontoTotal,
+  String estadoReserva,
+  String estadoPago
 ) {}

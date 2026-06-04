@@ -4,6 +4,7 @@ import com.example.backend.firestore.FirestoreCollections;
 import com.example.backend.firestore.FirestoreFutures;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class PaqueteRepository {
     data.put("id_paquete", e.getId_paquete());
     data.put("imagenes", e.getImagenes());
     data.put("estado", Boolean.TRUE.equals(e.getEstado()));
+    data.put("idAutos", e.getIdAutos() != null ? e.getIdAutos() : List.of());
     FirestoreFutures.get(col().document(e.getId()).set(data));
     return e;
   }
@@ -56,8 +58,21 @@ public class PaqueteRepository {
     e.setPresio(d.getLong("presio"));
     e.setId_paquete(d.getString("id_paquete"));
     e.setImagenes(d.getString("imagenes"));
+    e.setIdAutos(safeStringList(d.get("idAutos")));
     Boolean estado = d.getBoolean("estado");
     e.setEstado(estado == null ? true : Boolean.TRUE.equals(estado));
     return e;
+  }
+
+  private List<String> safeStringList(Object value) {
+    if (!(value instanceof List<?> raw)) return List.of();
+
+    List<String> result = new ArrayList<>();
+    for (Object item : raw) {
+      if (item != null && !String.valueOf(item).isBlank()) {
+        result.add(String.valueOf(item));
+      }
+    }
+    return result;
   }
 }

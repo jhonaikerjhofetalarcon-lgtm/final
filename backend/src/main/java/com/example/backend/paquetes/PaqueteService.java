@@ -51,5 +51,6 @@ public class PaqueteService {
     e.setPresio(req.presio());
     e.setId_paquete(req.id_paquete());
     e.setImagenes(req.imagenes());
+    e.setIdAutos(req.idAutos());
   }
 }

@@ -15,7 +15,16 @@ public record ReservaResponse(
   int dni,
   String idAsiento,
   String notas,
-  String origen,           // ← NUEVO
+  String origen,
+  String paqueteId,
+  String paqueteTitulo,
+  String paqueteCodigo,
+  Integer cantidadPersonas,
+  Double paquetePrecioUnitario,
+  Double paqueteDescuento,
+  Double paqueteMontoTotal,
+  String estadoReserva,
+  String estadoPago,
   Instant createdAt
 ) {
 
@@ -33,6 +42,15 @@ public record ReservaResponse(
       e.getIdAsiento(),
       e.getNotas(),
       e.getOrigen(),
+      e.getPaqueteId(),
+      e.getPaqueteTitulo(),
+      e.getPaqueteCodigo(),
+      e.getCantidadPersonas(),
+      e.getPaquetePrecioUnitario(),
+      e.getPaqueteDescuento(),
+      e.getPaqueteMontoTotal(),
+      e.getEstadoReserva(),
+      e.getEstadoPago(),
       e.getCreatedAt()
     );
   }
